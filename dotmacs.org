@@ -1,0 +1,2726 @@
+#+TITLE: DotEmacs
+#+AUTHOR: Loris Lucido
+#+PROPERTY: header-args :tangle no :results none
+#+PROPERTY: header-args:emacs-lisp :tangle yes :results silent
+
+* Introduction
+** Readme
+
+This config uses =evil= (Extensible Vi Layer) which provides Vim editing
+features into Emacs. The shortcuts are heavily inspired by Spacemacs: they
+should be mnemonics, consistent, and should not rely on modifiers.
+
+They are instead based on key combinations using a leader/prefix key. =SPC= is
+used as the main leader key while =,= is used for mode-specific keybindings. To
+configure keybindings easily I use =general= while =which-key= is used for key
+discoverability.
+
+When possible, transient-states are used. Those allow to repeat keybindings
+without entering the prefix key again. Those are implemented using =hercules=.
+
+Finally, =helm= is used as a fuzzy completion framework wherever possible.
+
+Lots of functions have been directly taken from the Spacemacs project.
+
+** Installation
+
+Backup your init files if necessary and copy this current file (=dotmacs.org=),
+=init.el= and =early-init.el= in =~/.emacs.d=.
+
+Next time, simply reload changes with =<SPC> f e r=.
+
+** Very basic vim doc
+*** Command syntax
+
+| =vim= | http://vimdoc.sourceforge.net/htmldoc/motion.html |
+
+A vim command (emulated with =evil=) usualy looks like this:
+=<COUNT> <OPERATOR> <COUNT> <MOTION>=
+
+Please note that most of the arguments are optionnal, you can use some
+=<OPERATOR>= without =<MOTION>= and vise-versa. The =<COUNT>= are
+multiplicative.
+
+*** Operators
+
+#+BEGIN_QUOTE
+| c  | change                                            | evil-change        |
+| d  | delete                                            | evil-delete        |
+| y  | yank into register (does not change the text)     | evil-yank          |
+| ~  | swap case (only if 'tildeop' is set)              | evil-invert-char   |
+| g~ | swap case                                         | evil-invert-case   |
+| gu | make lowercase                                    | evil-downcase      |
+| gU | make uppercase                                    | evil-upcase        |
+| !  | filter through an external program                | evil-shell-command |
+| =  | filter through 'equalprg' or C-indenting if empty | evil-indent        |
+| gq | text formatting                                   | evil-fill-and-move |
+| g? | ROT13 encoding                                    | evil-rot13         |
+| >  | shift right                                       | evil-shift-right   |
+| <  | shift left                                        | evil-shift-left    |
+| zf | define a fold                                     | nil                |
+| g@ | call function set with the 'operatorfunc' option  | nil                |
+#+END_QUOTE
+
+*** Motions
+**** Left-right motions
+
+#+BEGIN_QUOTE
+| h                     |   |   |
+| l                     |   |   |
+| 0                     |   |   |
+| ^                     |   |   |
+| $                     |   |   |
+| g_                    |   |   |
+| g0                    |   |   |
+| g^                    |   |   |
+| gm                    |   |   |
+| g$                    |   |   |
+| \vert                 |   |   |
+| f{char}               |   |   |
+| F{char}               |   |   |
+| t{char}               |   |   |
+| T{char}               |   |   |
+| ;                     |   |   |
+| ,                     |   |   |
+#+END_QUOTE
+
+**** Up-down motions
+
+#+BEGIN_QUOTE
+| k                     |   |   |
+| j                     |   |   |
+| gk                    |   |   |
+| gj                    |   |   |
+| -                     |   |   |
+| +                     |   |   |
+| _                     |   |   |
+| G                     |   |   |
+| gg                    |   |   |
+| :[range]              |   |   |
+| {count}%              |   |   |
+| :[range]go            |   |   |
+| [count]go             |   |   |
+#+END_QUOTE
+
+**** Word motions
+
+#+BEGIN_QUOTE
+| w                     |   |   |
+| W                     |   |   |
+| e                     |   |   |
+| E                     |   |   |
+| b                     |   |   |
+| B                     |   |   |
+| ge                    |   |   |
+| gE                    |   |   |
+#+END_QUOTE
+
+**** Text-object motions
+
+#+BEGIN_QUOTE
+| (                     |   |   |
+| )                     |   |   |
+| {                     |   |   |
+| }                     |   |   |
+| ]]                    |   |   |
+| ][                    |   |   |
+| [[                    |   |   |
+| []                    |   |   |
+#+END_QUOTE
+
+**** Text-object selection motions
+
+#+BEGIN_QUOTE
+| aw                    |   |   |
+| iw                    |   |   |
+| aW                    |   |   |
+| iW                    |   |   |
+| as                    |   |   |
+| is                    |   |   |
+| ap                    |   |   |
+| ip                    |   |   |
+| a]                    |   |   |
+| a[                    |   |   |
+| i]                    |   |   |
+| i[                    |   |   |
+| a)                    |   |   |
+| a(                    |   |   |
+| ab                    |   |   |
+| i)                    |   |   |
+| i(                    |   |   |
+| ib                    |   |   |
+| a>                    |   |   |
+| a<                    |   |   |
+| i>                    |   |   |
+| i<                    |   |   |
+| at                    |   |   |
+| it                    |   |   |
+| a}                    |   |   |
+| a{                    |   |   |
+| aB                    |   |   |
+| i}                    |   |   |
+| i{                    |   |   |
+| iB                    |   |   |
+| a"                    |   |   |
+| a'                    |   |   |
+| a`                    |   |   |
+| i"                    |   |   |
+| i'                    |   |   |
+| i`                    |   |   |
+#+END_QUOTE
+
+** Naming conventions
+
+From Spacemacs:
+
+#+BEGIN_QUOTE
+Function names follow these conventions:
+
+=me/xxx= is an interactive function called =xxx=
+=me//xxx= is a private function called =xxx= (implementation details)
+=me|xxx= is a macro called =xxx=
+
+Variables follow these conventions:
+
+=me-xxx= is a variable
+=me--xxx= is a private variable (implementation details)
+#+END_QUOTE
+
+* Definitions
+** Elisp
+
+#+BEGIN_SRC emacs-lisp
+(defun me/add-to-list-multi (list list-to-add &optional append compare-fn)
+  "Adds multiple items to LIST.
+Allows for adding a sequence of items to the same list, rather
+than having to call `add-to-list' multiple times."
+  (dolist (item list-to-add)
+    (add-to-list list item append compare-fn)))
+#+END_SRC
+
+** Init files
+
+#+BEGIN_SRC emacs-lisp
+(defun me/find-user-org-file ()
+  "Open `org-mode' config file in the current window."
+  (interactive)
+  (find-file-existing me-config-file-org))
+
+(defun me/find-user-org-tangle-file ()
+  "Open the tangle `org-mode' config file in the current window."
+  (interactive)
+  (find-file-existing me-config-file))
+
+(defun me/find-user-init-file ()
+  "Open `user-init-file' in the current window."
+  (interactive)
+  (find-file-existing user-init-file))
+
+(defun me/find-early-init-file ()
+  "Open `early-init-file' in the current window."
+  (interactive)
+  (find-file-existing early-init-file))
+#+END_SRC
+
+** Files
+
+#+BEGIN_SRC emacs-lisp
+(defun spacemacs/copy-file ()
+  "Write the file under new name."
+  (interactive)
+  (call-interactively 'write-file))
+
+(defun spacemacs/delete-current-buffer-file ()
+  "Removes file connected to current buffer and kills buffer."
+  (interactive)
+  (let ((filename (buffer-file-name))
+        (buffer (current-buffer))
+        (name (buffer-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (ido-kill-buffer)
+      (when (yes-or-no-p "Are you sure you want to delete this file? ")
+        (delete-file filename t)
+        (kill-buffer buffer)
+        ;; FIXME: check projectile package is used
+        (when (projectile-project-p)
+          (call-interactively #'projectile-invalidate-cache))
+        (message "File '%s' successfully removed" filename)))))
+
+(defun spacemacs/sudo-edit (&optional arg)
+  (interactive "P")
+  (let ((fname (if (or arg (not buffer-file-name))
+                   (read-file-name "File: ")
+                 buffer-file-name)))
+    (find-file
+     (cond ((string-match-p "^/ssh:" fname)
+            (with-temp-buffer
+              (insert fname)
+              (search-backward ":")
+              (let ((last-match-end nil)
+                    (last-ssh-hostname nil))
+                (while (string-match "@\\\([^:|]+\\\)" fname last-match-end)
+                  (setq last-ssh-hostname (or (match-string 1 fname)
+                                              last-ssh-hostname))
+                  (setq last-match-end (match-end 0)))
+                (insert (format "|sudo:%s" (or last-ssh-hostname "localhost"))))
+              (buffer-string)))
+           (t (concat "/sudo:root@localhost:" fname))))))
+
+(defun spacemacs//open-in-external-app (file-path)
+  "Open `file-path' in external application."
+  (cond
+   ((spacemacs/system-is-mswindows) (w32-shell-execute "open" (replace-regexp-in-string "/" "\\\\" file-path)))
+   ((spacemacs/system-is-mac) (shell-command (format "open \"%s\"" file-path)))
+   ((spacemacs/system-is-linux) (let ((process-connection-type nil))
+                                  (start-process "" nil "xdg-open" file-path)))))
+
+(defun spacemacs/open-file-or-directory-in-external-app (arg)
+  "Open current file in external application.
+If the universal prefix argument is used then open the folder
+containing the current file by the default explorer."
+  (interactive "P")
+  (if arg
+      (spacemacs//open-in-external-app (expand-file-name default-directory))
+    (let ((file-path (if (derived-mode-p 'dired-mode)
+                         (dired-get-file-for-visit)
+                       buffer-file-name)))
+      (if file-path
+          (spacemacs//open-in-external-app file-path)
+        (message "No file associated to this buffer.")))))
+
+(defun spacemacs/rename-current-buffer-file ()
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let* ((name (buffer-name))
+         (filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (let* ((dir (file-name-directory filename))
+             (new-name (read-file-name "New name: " dir)))
+        (cond ((get-buffer new-name)
+               (error "A buffer named '%s' already exists!" new-name))
+              (t
+               (let ((dir (file-name-directory new-name)))
+                 (when (and (not (file-exists-p dir)) (yes-or-no-p (format "Create directory '%s'?" dir)))
+                   (make-directory dir t)))
+               (rename-file filename new-name 1)
+               (rename-buffer new-name)
+               (set-visited-file-name new-name)
+               (set-buffer-modified-p nil)
+               (when (fboundp 'recentf-add-file)
+                 (recentf-add-file new-name)
+                 (recentf-remove-if-non-kept filename))
+               ;; FIXME: check projectile package is used
+               (when (projectile-project-p)
+                 (call-interactively #'projectile-invalidate-cache))
+               (message "File '%s' successfully renamed to '%s'" name (file-name-nondirectory new-name))))))))
+
+(defun spacemacs/show-and-copy-buffer-filename ()
+  "Show and copy the full path to the current file in the minibuffer."
+  (interactive)
+  ;; list-buffers-directory is the variable set in dired buffers
+  (let ((file-name (or (buffer-file-name) list-buffers-directory)))
+    (if file-name
+        (message (kill-new file-name))
+      (error "Buffer not visiting a file"))))
+
+(defun spacemacs/helm-find-files (arg)
+  "Custom spacemacs implementation for calling helm-find-files-1.
+Removes the automatic guessing of the initial value based on thing at point. "
+  (interactive "P")
+  (let* ((hist (and arg helm-ff-history (helm-find-files-history)))
+         (default-input hist)
+         (input (cond ((and (eq major-mode 'dired-mode) default-input)
+                       (file-name-directory default-input))
+                      ((and (not (string= default-input ""))
+                            default-input))
+                      (t (expand-file-name (helm-current-directory))))))
+    (set-text-properties 0 (length input) nil input)
+    (helm-find-files-1 input)))
+#+END_SRC
+
+** Buffers
+
+#+BEGIN_SRC emacs-lisp
+(defun me/switch-to-messages()
+  (interactive)
+  (switch-to-buffer "*Messages*"))
+
+(defun me/switch-to-scratch()
+  (interactive)
+  (switch-to-buffer "*scratch*"))
+#+END_SRC
+
+** Format
+
+TODO: refactorise this shit
+
+#+BEGIN_SRC emacs-lisp
+(defun me/sort-lines (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case t)
+  (sort-lines nil beg end))
+(defun me/sort-lines-case (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case nil)
+  (sort-lines nil beg end))
+(defun me/sort-lines-reverse (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case t)
+  (sort-lines t beg end))
+(defun me/sort-lines-case-reverse (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case nil)
+  (sort-lines t beg end))
+(defun me/sort-paragraphs (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case t)
+  (sort-paragraphs nil beg end))
+(defun me/sort-paragraphs-case (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case nil)
+  (sort-paragraphs nil beg end))
+(defun me/sort-paragraphs-reverse (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case t)
+  (sort-paragraphs t beg end))
+(defun me/sort-paragraphs-case-reverse (beg end)
+  (interactive "r")
+  (setq-local sort-fold-case nil)
+  (sort-paragraphs t beg end))
+#+END_SRC
+
+** Quit
+
+#+BEGIN_SRC emacs-lisp
+(defun me/prompt-kill-emacs ()
+  "Prompt user to save files before exiting."
+  (interactive)
+  (save-some-buffers)
+  (kill-emacs))
+
+(defun me/kill-frame ()
+  (interactive)
+  (condition-case-unless-debug nil
+      (delete-frame nil 1)
+    (error (make-frame-invisible nil 1))))
+
+(defun me/prompt-kill-frame ()
+  "Prompt user to save file before killing frame."
+  (interactive)
+  (save-some-buffers)
+  (condition-case-unless-debug nil
+      (delete-frame nil 1)
+    (error (make-frame-invisible nil 1))))
+#+END_SRC
+
+** Windows
+
+#+BEGIN_SRC emacs-lisp
+;; from https://gist.github.com/3402786
+(defun spacemacs/toggle-maximize-buffer ()
+  "Maximize buffer"
+  (interactive)
+  (save-excursion
+    (if (and (= 1 (length (window-list)))
+             (assoc ?_ register-alist))
+        (jump-to-register ?_)
+      (progn
+        (window-configuration-to-register ?_)
+        (delete-other-windows)))))
+#+END_SRC
+
+* Bootstrap
+** Better Defaults
+
+Here are what I consider better defaults as per my own experience.
+
+#+BEGIN_SRC emacs-lisp
+(setq-default
+ ;;ad-redefinition-action 'accept         ; Silence warnings for redefinition
+ ;;require-final-newline t                ; Newline at end of file
+ ;;auto-save-list-file-prefix nil         ; Prevent tracking for auto-saves
+ ;;cursor-in-non-selected-windows nil     ; Hide the cursor in inactive windows
+ ;;custom-unlispify-menu-entries nil      ; Prefer kebab-case for titles
+ ;;custom-unlispify-tag-names nil         ; Prefer kebab-case for symbols
+ ;;delete-by-moving-to-trash t            ; Delete files to trash
+ fill-column 80                         ; Set width for automatic line breaks
+ help-window-select t                   ; Focus new help windows when opened
+ indent-tabs-mode nil                   ; Stop using tabs to indent
+ inhibit-startup-screen t               ; Disable start-up screen
+ initial-scratch-message ""             ; Empty the initial *scratch* buffer
+ mouse-yank-at-point t                  ; Yank at point rather than pointer
+ gc-cons-threshold (* 8 1024 1024)      ; We're not using Game Boys anymore
+ read-process-output-max (* 1024 1024)  ; Increase read size per process
+ ;;recenter-positions '(5 top bottom)     ; Set re-centering positions
+ ;;scroll-conservatively 101              ; Avoid recentering when scrolling far
+ ;;scroll-margin 2                        ; Add a margin when scrolling vertically
+ select-enable-clipboard t              ; Merge system's and Emacs' clipboard
+ ;;sentence-end-double-space nil          ; Use a single space after dots
+ show-help-function nil                 ; Disable help text everywhere
+ tab-always-indent 'complete            ; Tab indents first then tries completions
+ tab-width 4                            ; Smaller width for tab characters
+ ;;uniquify-buffer-name-style 'forward    ; Uniquify buffer names
+ ;;warning-minimum-level :error           ; Skip warning buffers
+ ;;window-combination-resize t            ; Resize windows proportionally
+ ;;x-stretch-cursor t                     ; Stretch cursor to the glyph width
+ vc-follow-symlinks t)                  ; Open symlinks without confirmation
+
+(blink-cursor-mode 0)                   ; Prefer a still cursor
+(delete-selection-mode 1)               ; Replace region when inserting text
+(fset 'yes-or-no-p 'y-or-n-p)           ; Replace yes/no prompts with y/n
+(global-subword-mode 1)                 ; Iterate through CamelCase words
+;;(mouse-avoidance-mode 'exile)           ; Avoid collision of mouse with point
+;;(put 'downcase-region 'disabled nil)    ; Enable downcase-region
+;;(put 'upcase-region 'disabled nil)      ; Enable upcase-region
+(set-default-coding-systems 'utf-8)     ; Default to utf-8 encoding
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(tool-bar-mode -1)                      ; Disable tool bar
+(menu-bar-mode -1)                      ; Disable menu bar
+(scroll-bar-mode -1)                    ; Disable scroll bar
+(global-hl-line-mode t)                 ; Highlight current line
+#+END_SRC
+
+Fix backspace when in terminal. You also need to configure your terminal to not
+send =^H= with backspace.
+
+#+BEGIN_SRC emacs-lisp
+(normal-erase-is-backspace-mode 0)
+#+END_SRC
+
+Change a few indenting behaviors.
+
+#+BEGIN_SRC emacs-lisp
+(put 'add-function 'lisp-indent-function 2)
+(put 'advice-add 'lisp-indent-function 2)
+(put 'plist-put 'lisp-indent-function 2)
+#+END_SRC
+
+** Cache & Backups
+
+Use =.cache/= to contain local data. This is to avoid littering in the Emacs
+directory with an ever-growing number of packages used on a daily basis.
+
+#+BEGIN_SRC emacs-lisp
+(defmacro me|set-in-cache-dir (var loc)
+  "Set VAR to LOC concatenated with the cache directory."
+  `(setq ,var (me/cache-concat ,loc)))
+
+(defmacro me|custom-set-in-cache-dir (var loc)
+  "Customize VAR to LOC concatenated with the cache directory."
+  `(custom-set-variables '(,var (me/cache-concat ,loc))))
+#+END_SRC
+
+For network related cache files:
+
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'request
+  (me|set-in-cache-dir request-storage-directory "request/"))
+(with-eval-after-load 'tramp
+  (me|set-in-cache-dir tramp-persistency-file-name "tramp.eld"))
+(with-eval-after-load 'url
+  (me|set-in-cache-dir url-configuration-directory "url/"))
+#+END_SRC
+
+Garbage-collect on focus-out, Emacs /should/ feel snappier overall.
+
+#+BEGIN_SRC emacs-lisp
+(if (version< emacs-version "27.0")
+    (add-hook 'focus-out-hook #'garbage-collect)
+  (add-function :after after-focus-change-function
+    (defun me/garbage-collect-maybe ()
+      (unless (frame-focus-state)
+        (garbage-collect)))))
+#+END_SRC
+
+The =customize-*= routines writes directly at the end of the =user-init-file= or
+into a dedicated file when set accordingly. This feature is completely disabled
+and I redirect the writing to =/dev/null=.
+
+#+BEGIN_SRC emacs-lisp
+(setq-default custom-file null-device)
+#+END_SRC
+
+Prevent emacs from creating backup files everywhere.
+
+#+BEGIN_SRC emacs-lisp
+(let ((backup-dir (me/cache-concat "backup/"))
+      (auto-saves-dir (me/cache-concat "auto-saves/")))
+  (dolist (dir (list backup-dir auto-saves-dir))
+    (when (not (file-directory-p dir))
+      (make-directory backup-dir t)))
+  (setq backup-directory-alist `(("." . ,backup-dir))
+        auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
+        tramp-backup-directory-alist `((".*" . ,backup-dir))
+        tramp-auto-save-directory auto-saves-dir))
+#+END_SRC
+
+Add more backups. We always make backups by copying. Safe, but slow. If that's
+too slow see =backup-by-copying-when-linked=.
+
+#+BEGIN_SRC emacs-lisp
+(setq make-backup-files t vc-make-backup-files t
+      backup-by-copying t delete-old-versions t kept-new-versions
+      6 kept-old-versions 2 version-control t)
+#+END_SRC
+
+Change other temporary files locations.
+
+#+BEGIN_SRC emacs-lisp
+(me|set-in-cache-dir bookmark-default-file "org-bookmarks")
+(me|set-in-cache-dir eshell-directory-name "eshell")
+(me|set-in-cache-dir helm-adaptive-history-file "helm-adaptive-history")
+(me|set-in-cache-dir lsp-session-file "lsp-session-v1")
+(me|set-in-cache-dir recentf-save-file "recentf")
+(me|set-in-cache-dir transient-history-file "transient/history.el")
+(me|set-in-cache-dir transient-levels-file "transient/levels.el")
+(me|set-in-cache-dir transient-values-file "transient/values.el")
+#+END_SRC
+
+Native compiled files (=.elc=) are also stored in =.cache= but it is done in
+=early-init.el= to make sure all compiled files go into the cache.
+
+** Packages
+
+# TODO: Toogle between online and local
+# TODO: Setup offline repo with minimal dep
+| =elpa-mirror= | https://github.com/redguardtoo/elpa-mirror |
+
+| =package=     | Built-in                                |
+| =use-package= | https://github.com/jwiegley/use-package |
+
+Setup offline repositories.
+
+#+BEGIN_SRC emacs-lisp
+(require 'package)
+(package-initialize)
+(setq package-archives nil)
+(me/add-to-list-multi
+ 'package-archives
+ (list '("gnu_local"   . "~/emacs-pkgs/gnu")
+       '("melpa_local" . "~/emacs-pkgs/melpa")
+       ; '("melpa"       . "https://melpa.org/packages/")
+       ; '("gnu"         . "https://elpa.gnu.org/packages/")
+       ; '("org"         . "https://orgmode.org/elpa/")
+       ; '("nongnu"      . "https://elpa.nongnu.org/nongnu/")
+      )
+ t) ; from highest priority to lowest (`append' flag)
+#+END_SRC
+
+Install the =use-package= dependency.
+
+#+BEGIN_SRC emacs-lisp
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(setq use-package-always-ensure t
+      use-packagealways-defer t)
+#+END_SRC
+
+Loading additionnal elisp files.
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path (expand-file-name "lisp/"
+                                          user-emacs-directory))
+#+END_SRC
+
+** Required executables
+
+Check we have all we need installed.
+
+#+BEGIN_SRC emacs-lisp
+(dolist (exe (list "clangd" ; C/C++ LSP server
+                   "fortls" ; Fortran LSP server
+                   "rg"))   ; fastest grep in the west
+  (when (not (executable-find exe))
+    (message "Warning: Executable %s not found." exe)))
+#+END_SRC
+
+* Core Packages
+** Leader-based keybindings (=general=)
+
+| =general= | https://github.com/noctuid/general.el |
+
+More convenient key definitions in emacs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package general
+  :init
+  (defconst me/leader-key "SPC")
+  (defconst me/leader-mode-key ",")
+  (setq general-override-states '(insert
+                                  ;; emacs
+                                  hybrid
+                                  normal
+                                  visual
+                                  motion
+                                  operator
+                                  replace))
+  :config
+  (general-create-definer me/leader-def
+    :prefix me/leader-key
+    :keymaps 'override
+    :states '(normal visual motion))
+  (general-create-definer me/leader-mode-def
+    :prefix me/leader-mode-key
+    :states 'normal))
+#+END_SRC
+
+** Transient states (=hercules=)
+
+| =hercules= | https://gitlab.com/jjzmajic/hercules.el|
+
+Implement transient states /a la/ spacemacs using =hercules=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package hercules)
+#+END_SRC
+
+Usage example:
+
+#+BEGIN_SRC emacs-lisp :eval no :tangle no
+;; Define the keymap when in the transient state
+(general-def
+  :prefix-map 'transient-dummy-map
+  "q"    '(:ignore t :which-key "quit")
+  "q"   #'me//transient-toggle-dummy
+  "C-j" #'dummy-next
+  "C-k" #'dummy-prev)
+
+(defun me//transient-toggle-dummy()(interactive))
+;; Define the entry and exit functions of the transient state
+(hercules-def
+ :show-funs   #'me//transient-enter-dummy
+ :hide-funs   #'me//transient-exit-dummy
+ :toggle-funs #'me//transient-toggle-dummy
+ :keymap 'transient-dummy-map
+ :transient t)
+#+END_SRC
+
+** Vim bindings (=evil=)
+
+| =evil=                | https://github.com/emacs-evil/evil                 |
+| =evil-args=           | https://github.com/wcsmith/evil-args               |
+| =evil-escape=         | https://github.com/syl20bnr/evil-escape            |
+| =evil-nerd-commenter= | https://github.com/redguardtoo/evil-nerd-commenter |
+| =evil-numbers=        | https://github.com/juliapath/evil-numbers          |
+| =evil-snipe=          | https://github.com/hlissner/evil-snipe             |
+| =evil-lion=           | https://github.com/edkolev/evil-lion               |
+| =evil-surround=       | https://github.com/emacs-evil/evil-surround        |
+| =evil-easymotion=     | https://github.com/PythonNut/evil-easymotion       |
+| =evil-collection=     | https://github.com/emacs-evil/evil-collection      |
+| =evil-org-mode=       | https://github.com/Somelauw/evil-org-mode          |
+
+Evil is an extensible vi layer for Emacs. It emulates the main features of Vim,
+and provides facilities for writing custom extensions.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil
+  :init
+  (setq evil-want-Y-yank-to-eol t
+        evil-move-beyond-eol nil
+        ;; In case you run Emacs in a terminal, you might find that TAB does not
+        ;; work as expected (being bound to evil-jump-forward instead of
+        ;; org-tab). You can add this to your configuration to get org-tab
+        ;; instead at the cost of losing C-i to jump.
+        evil-want-C-i-jump nil
+        evil-undo-system 'undo-tree
+        evil-symbol-word-search t
+        evil-want-integration t    ; leave this on for evil-collection
+        evil-want-keybinding nil)  ; let evil-collection do the rebinding
+  :config
+  (evil-mode 1))
+#+END_SRC
+
+Paste transient state.
+
+#+BEGIN_SRC emacs-lisp
+(general-def
+  :prefix-map 'transient-paste-map
+  "q"    '(:ignore t :which-key "quit4")
+  "q"   #'me//transient-evil-paste
+  "C-j" #'evil-paste-pop-next
+  "C-k" #'evil-paste-pop)
+
+(hercules-def
+ :show-funs '(evil-paste-after evil-paste-before)
+ :hide-funs #'me//transient-evil-paste
+ :keymap 'transient-paste-map
+ :transient t)
+#+END_SRC
+
+
+Motions and text objects for delimited arguments in Evil.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-args
+  :config
+  (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+  (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
+#+END_SRC
+
+Customizable key sequence to escape from insert state and everything else in
+Emacs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-escape
+  :init
+  (setq-default evil-escape-key-sequence "jk"
+                evil-escape-delay 0.3)
+  :config
+  (evil-escape-mode 1))
+#+END_SRC
+
+To Help comment code efficiently.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-nerd-commenter)
+#+END_SRC
+
+Increment and decrement binary, octal, decimal and hex literals.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-numbers
+  :config
+  (defun me//transient-evil-numbers()(interactive))
+  (general-def
+    :prefix-map 'transient-evil-numbers-map
+    "q" '(:ignore t :which-key "quit2")
+    "q" 'me//transient-evil-numbers
+    "=" '(:ignore t :which-key "increment")
+    "=" #'evil-numbers/inc-at-pt
+    "+" '(:ignore t :which-key "increment")
+    "+" #'evil-numbers/inc-at-pt
+    "-" '(:ignore t :which-key "decrement")
+    "-" #'evil-numbers/dec-at-pt
+    "k" '(:ignore t :which-key "increment")
+    "k" #'evil-numbers/inc-at-pt
+    "j" '(:ignore t :which-key "decrement")
+    "j" #'evil-numbers/dec-at-pt)
+  (hercules-def
+   :toggle-funs 'me//transient-evil-numbers
+   :keymap 'transient-evil-numbers-map
+   :transient t))
+#+END_SRC
+
+=evil-snipe= provides 2-character motions for quickly (and more accurately)
+jumping around text, incrementally highlighting candidate targets as you type.
+
+=evil-snipe= binds =s= (forward) / =S= (backward) to =evil-snipe-s= and
+=evil-snipe=, respectively. In operator mode, snipe is bound to =z/Z= and =x/X=
+(exclusive). The last snipe can be repeated with =s/S= after a successful snipe.
+# FIXME: operator mode bindings does not work with which-key-mode
+
+We override =evil-mode='s native motions with 1-char sniping to allow repeat
+searches with =f/F/t/T= and =;/,=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-snipe
+  :init
+  (setq evil-snipe-scope 'whole-visible
+        evil-snipe-repeat-scope 'whole-visible)
+  :config
+  (evil-snipe-mode +1)
+  (evil-snipe-override-mode +1))
+#+END_SRC
+
+This package provides =gl= and =gL= align operators: =gl MOTION CHAR= and
+right-align =gL MOTION CHAR=. Use =CHAR /= to enter regular expression if a
+single character wouldn't suffice. Use =CHAR RET= to align with =align.el='s
+default rules for the active major mode.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-lion
+  :config
+  (evil-lion-mode))
+#+END_SRC
+
+Provides mappings to easily delete, change and add surroundings in pairs
+(parentheses, brackets, quotes, XML tags, and more).
+
+Use =COMMAND TEXT_OBJECT DELIM= where =COMMAND= is =ys= (add), =cs= (change) or
+=ds= (delete). Use an openning pair as =DELIM= to add some space.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-surround
+  :config
+  (global-evil-surround-mode 1))
+#+END_SRC
+
+=evil-easymotion= provides a much simpler way to use some motions. It takes the
+=<COUNT>= out of =<COUNT><MOTION>= by highlighting all possible choices and
+allowing you to press one key to jump directly to the target.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-easymotion
+  :config
+  (evilem-default-keybindings "SPC"))
+#+END_SRC
+
+This is a collection of Evil bindings for the parts of Emacs that Evil does not
+cover properly by default.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-collection
+  :config
+  (evil-collection-init))
+#+END_SRC
+
+Supplemental =evil-mode= keybindings to emacs =org-mode= ([[https://github.com/Somelauw/evil-org-mode/blob/master/doc/keythemes.org][doc]]).
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-org
+  :after org
+  ;; :hook (org-mode . evil-org-mode) XXX: fix
+  :init
+  (setq org-special-ctrl-a/e t
+        evil-org-key-theme
+        '(navigation insert textobjects additional calendar return))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-set-key-theme)
+  (evil-org-agenda-set-keys)
+  (add-hook 'org-mode-hook
+            (lambda () (evil-org-mode)))
+  (add-hook 'org-mode-hook
+            (lambda () (define-key evil-normal-state-map
+                                   (kbd "RET") 'org-return))))
+#+END_SRC
+
+** Fuzzy completion everywhere (=helm=)
+
+| =helm=            | https://github.com/emacs-helm/helm            |
+| =helm-gtags=      | https://github.com/emacsorphanage/helm-gtags  |
+| =helm-projectile= | https://github.com/bbatsov/helm-projectile    |
+| =helm-xref=       | https://github.com/brotzeit/helm-xref         |
+| =helm-lsp=        | https://github.com/emacs-lsp/helm-lsp         |
+| =helm-descbinds=  | https://github.com/emacs-helm/helm-descbinds  |
+| =helm-swoop=      | https://github.com/emacsorphanage/helm-swoop  |
+| =helm-ag=         | https://github.com/emacsorphanage/helm-ag     |
+| =helm-themes=     | https://github.com/emacsorphanage/helm-themes |
+
+Completion and candidates display framework.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm
+  :init
+  ;; completion is done by emacs using `flex' engine when available
+  ;; (>= emacs 27) or fall back to `helm-flex'.
+  (setq-default helm-completion-style 'emacs)
+  (setq completion-styles
+        (if (version< emacs-version "27.0")
+            '(helm-flex)
+          '(flex)))
+  :config
+  (require 'helm-config)
+  (define-key global-map [remap find-file] 'helm-find-files)
+  (define-key global-map [remap occur] 'helm-occur)
+  (define-key global-map [remap list-buffers] 'helm-buffers-list)
+  (define-key global-map [remap dabbrev-expand] 'helm-dabbrev)
+  (define-key global-map [remap execute-extended-command] 'helm-M-x)
+  (define-key global-map [remap apropos-command] 'helm-apropos)
+  (unless (boundp 'completion-in-region-function)
+    (define-key lisp-interaction-mode-map [remap completion-at-point]
+                'helm-lisp-completion-at-point)
+    (define-key emacs-lisp-mode-map       [remap completion-at-point]
+                'helm-lisp-completion-at-point))
+  (define-key helm-map (kbd "C-j") 'helm-next-line)
+  (define-key helm-map (kbd "C-k") 'helm-previous-line)
+  (helm-mode 1))
+#+END_SRC
+
+Install =gtags= support in =helm=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-gtags
+  :init
+  (setq helm-gtags-ignore-case t
+        helm-gtags-path-style 'relative
+        helm-gtags-auto-update t
+        helm-gtags-update-interval-second nil
+        helm-gtags-use-input-at-cursor t
+        helm-gtags-pulse-at-cursor t))
+#+END_SRC
+
+Install =projectile= support in =helm=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-projectile
+  :config
+  (helm-projectile-on))
+#+END_SRC
+
+A =helm= frontend for =describe-bindings=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-descbinds
+  :config
+  (helm-descbinds-mode))
+#+END_SRC
+
+Efficiently hopping squeezed lines powered by =helm=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-swoop
+  :init
+  (setq helm-swoop-use-fuzzy-match t))
+#+END_SRC
+
+Helm interface for =xref= results. Needed for some additionnal goodies in =lsp=
+such as =lsp-find-references=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-xref)
+#+END_SRC
+
+This package provides alternative of the build-in =lsp-mode xref-appropos=
+which provides as you type completion.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-lsp
+  :commands
+  helm-lsp-workspace-symbol
+  :config
+  (define-key lsp-mode-map
+              [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+#+END_SRC
+
+Helm interface to =ripgrep=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-ag
+  :config
+  (custom-set-variables
+   '(helm-ag-base-command "rg --no-heading")
+   '(helm-ag-success-exit-status '(0 2))))
+#+END_SRC
+
+Emacs theme selection with =helm= interface.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-themes)
+#+END_SRC
+
+** Key discoverability (=which-key=)
+
+| =which-key= | https://github.com/justbur/emacs-which-key |
+
+Display available keybindings in a popup.
+
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :init
+  (setq which-key-idle-delay 1.5
+        which-key-idle-secondary-delay 0.05
+        which-key-sort-order 'which-key-key-order-alpha
+        which-key-sort-uppercase-first nil
+        which-key-separator " -> "
+        which-key-allow-evil-operators t
+        which-key-show-early-on-C-h t
+        which-key-show-operator-state-maps nil
+        which-key-paging-prefixes '("C-x")
+        which-key-paging-key "<f5>"
+        which-key-max-display-columns 4
+        which-key-max-description-length nil
+        which-key-side-window-max-height 0.5
+        which-key-add-column-padding 0
+        which-key-special-keys nil)
+  :config
+  (setq me--default-which-key-idle-delay which-key-idle-delay)
+  (which-key-mode)
+  (which-key-setup-side-window-bottom)
+  (defun me/toggle-which-key-delay()
+    "Alternate between a short and longer which-key idle delay."
+    (interactive)
+    (setq which-key-idle-delay
+          (if (= which-key-idle-delay me--default-which-key-idle-delay)
+              0.05
+            me--default-which-key-idle-delay))
+    (which-key-mode t)
+    (message (format "which-key-idle-delay set to %s" which-key-idle-delay))))
+#+END_SRC
+
+Function to toggle which-key menu on evil operators.
+
+#+BEGIN_SRC emacs-lisp
+(defun me/toggle-which-key-show-operator-state-maps()
+  "Toggle which-key menu on evil operator. Disabling it seem to
+  fix some issue when there's a long idle time between when an
+  operator is pressed and the rest of the command."
+  (interactive)
+  (setq which-key-show-operator-state-maps
+        (not which-key-show-operator-state-maps))
+  (message (format "which-key-show-operator-state-maps is %s"
+                   which-key-show-operator-state-maps)))
+#+END_SRC
+
+** Spacemacs XXX: remove me
+*** Core
+
+Install spacemacs dependencies.
+
+#+BEGIN_SRC emacs-lisp2
+(use-package validate)
+(use-package hydra)
+(use-package page-break-lines)
+#+END_SRC
+
+Add spacemacs files to path and load core functions.
+
+#+BEGIN_SRC emacs-lisp2
+(load (concat user-emacs-directory "lisp/spacemacs/core/core-versions.el"))
+(load (concat user-emacs-directory "lisp/spacemacs/core/core-load-paths.el"))
+(require 'core-spacemacs)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp2
+(require 'core-transient-state)
+(spacemacs|define-transient-state paste-mode
+        :title "Paste Transient State"
+        :doc "
+ [_j_/_k_] down/up        [_Q_] quit twitter"
+        :bindings
+        ("?"          nil :exit t)
+        ("C-j"        evil-paste-pop-next)
+        ("C-k"        evil-paste-pop))
+#+END_SRC
+
+* Aesthetics
+** Frame
+
+To disable loading of unused graphical components add this snippet of code into
+your =~/.Xressources= file:
+
+#+BEGIN_SRC conf
+! disable emacs loading of unused components emacs.menuBar: off emacs.toolBar:
+off emacs.verticalScrollBars: off
+#+END_SRC
+
+Change font to a powerline-patched one.
+
+#+BEGIN_SRC emacs-lisp
+;; (set-default-font "Dejavu Sans Mono for Powerline")
+(set-face-attribute 'default nil :height 100) ;; format: 1/X pt
+#+END_SRC
+
+Change frame name of emacs.
+
+#+BEGIN_SRC emacs-lisp
+(setq frame-title-format
+      '("Emacs - " (buffer-file-name "%f"
+                                     (dired-directory dired-directory "%b"))))
+#+END_SRC
+
+** Themes
+*** Themes
+
+Install Spacemacs themes.
+
+#+BEGIN_SRC emacs-lisp
+(use-package spacemacs-common
+  :ensure spacemacs-theme
+  :init (setq spacemacs-theme-comment-bg nil)
+  :config (load-theme 'spacemacs-dark t))
+#+END_SRC
+
+*** Helpers
+
+Initialize known themes and provide a helper to cycle through known themes.
+
+#+BEGIN_SRC emacs-lisp
+(defvar me/theme-known-themes '(spacemacs-dark spacemacs-light)
+  "List of themes to take into account with `me/theme-cycle'.
+  See `custom-available-themes'.")
+
+(defun me/theme-disable-themes ()
+  "Disable all themes found in `custom-enable-themes'."
+  (interactive)
+  (mapc #'disable-theme custom-enabled-themes))
+
+(defun me/theme-cycle (&optional revert)
+  "Cycle through themes from `me/theme-known-themes' in succession. Cycle
+  backward if REVERT is true."
+  (interactive)
+  (let* ((known-themes (if revert (reverse me/theme-known-themes)
+                         me/theme-known-themes))
+         (current (car custom-enabled-themes))
+         (next (or (cadr (memq current known-themes))
+                   (car known-themes))))
+    (me/theme-disable-themes)
+    (when next
+      (load-theme next t))
+    (message "%s" next)))
+
+(defun me/theme-cycle-backward ()
+  "Cycle backward through themes from `me/theme-known-themes' in succession."
+  (interactive)
+  (me/theme-cycle t))
+
+#+END_SRC
+
+** Org
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets :config
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 0))))
+#+END_SRC
+
+** Modeline
+
+| =evil-anzu= | https://github.com/emacsorphanage/evil-anzu |
+| =spaceline= | https://github.com/TheBB/spaceline          |
+
+Displays current match and total matches information in the mode-line.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-anzu
+  :init
+  ;; NOTE: Anzu inserts itself in the modeline, to let spaceline handle the
+  ;; modeline
+  (setq anzu-cons-mode-line-p nil))
+#+END_SRC
+
+This package implements hiding or abbreviation of the mode line displays
+(lighters) of minor-modes.
+
+#+BEGIN_SRC emacs-lisp
+(use-package diminish)
+#+END_SRC
+
+Install spacemacs's powerline.
+
+#+BEGIN_SRC emacs-lisp
+(use-package spaceline
+  :config
+  (spaceline-spacemacs-theme)
+  (spaceline-helm-mode 1)
+  (diminish 'eldoc-mode "ElDc")
+  (diminish 'abbrev-mode "AbRv")
+  (diminish 'undo-tree-mode "UdT")
+  (diminish 'whitespace-mode "WS")
+  (diminish 'ws-butler-mode "WsB")
+  (diminish 'yas-minor-mode "Yas")
+  (diminish 'projectile-global-mode "P")
+  (diminish 'lsp-mode "Lsp")
+  (diminish 'company-mode "Cpny")
+  (diminish 'evil-snipe-local-mode "EvSp")
+  (diminish 'column-enforce-mode "ClEf")
+  (diminish 'evil-escape-mode "jk")
+  (diminish 'helm-mode "Hlm")
+  (diminish 'which-key-mode "WhKy")
+  (diminish 'flycheck-mode "FlChk"))
+#+END_SRC
+
+** Colors
+
+| =rainbow-mode= | http://elpa.gnu.org/packages/rainbow-mode.html |
+
+This minor mode sets background color to strings that match color
+names.
+
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-mode)
+#+END_SRC
+
+* Packages
+** Collection of Ridiculously Useful eXtensions
+
+| =crux= | https://github.com/bbatsov/crux |
+
+A Collection of Ridiculously Useful eXtensions for Emacs. crux bundles many
+useful interactive commands to enhance your overall Emacs experience.
+
+#+BEGIN_SRC emacs-lisp
+(use-package crux)
+#+END_SRC
+
+** Column Enforce
+
+|=column-enforce-mode=|https://github.com/jordonbiondo/column-enforce-mode/|
+
+Highlight text that extends beyond =fill-column=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package column-enforce-mode
+  :init
+  (setq column-enforce-column fill-column)
+  :config
+  (add-hook 'text-mode-hook 'column-enforce-mode)
+  (add-hook 'prog-mode-hook 'column-enforce-mode))
+#+END_SRC
+
+** Completion
+
+| =company= | http://company-mode.github.io/ |
+
+Modular in-buffer completion framework for Emacs.
+
+# FIXME: not tested
+
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :config
+  (define-key company-active-map (kbd "M-n") nil)
+  (define-key company-active-map (kbd "M-p") nil)
+  (define-key company-search-map (kbd "M-n") nil)
+  (define-key company-search-map (kbd "M-p") nil)
+  (define-key company-active-map (kbd "C-n") 'company-select-next)
+  (define-key company-active-map (kbd "C-p") 'company-select-previous)
+  (define-key company-search-map (kbd "C-n") 'company-select-next)
+  (define-key company-search-map (kbd "C-p") 'company-select-previous)
+  ;;(define-key company-search-map (kbd "C-t") 'company-search-toggle-filtering)
+  (company-mode 1))
+#+END_SRC
+
+** Cursor saving
+
+Saves the location of the cursor for each file.
+
+#+BEGIN_SRC emacs-lisp
+(use-package saveplace
+  :init
+  (setq save-place-file (me/cache-concat "places"))
+  :config
+  (save-place-mode 1))
+#+END_SRC
+
+** Distraction-free
+
+|=olivetti=|https://github.com/rnkn/olivetti|
+
+#+BEGIN_SRC emacs-lisp
+(use-package olivetti)
+#+END_SRC
+
+Add hook for to remove line numbers and restore them on exit if necessary.
+
+#+BEGIN_SRC emacs-lisp
+(defvar-local me--previous-display-line-numbers-value display-line-numbers)
+(defun me//olivetti-mode-hook()
+  "Remember if we need to display line numbers or not."
+  (if olivetti-mode
+      (setq me--previous-display-line-numbers-value display-line-numbers
+            display-line-numbers nil)
+    (setq display-line-numbers me--previous-display-line-numbers-value)))
+(add-hook 'olivetti-mode-hook 'me//olivetti-mode-hook)
+#+END_SRC
+
+Add a transient state to resize the centered buffer.
+
+#+BEGIN_SRC emacs-lisp
+(defun me//transient-center-width()(interactive))
+(defun me/transient-center-width()
+  (interactive)
+  (and (bound-and-true-p olivetti-mode)
+       (me//transient-center-width)))
+
+(general-def
+  :prefix-map 'transient-center-width-map
+  "q" '(:ignore t :which-key "quit3")
+  "q" #'me//transient-center-width
+  "[" #'olivetti-shrink
+  "]" #'olivetti-expand)
+
+(hercules-def
+ :toggle-funs 'me//transient-center-width
+ :keymap 'transient-center-width-map
+ :transient t)
+#+END_SRC
+
+** File explorer
+
+| =treemacs= | https://github.com/Alexander-Miller/treemacs |
+
+A tree layout file explorer for Emacs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package treemacs
+  ;; :init
+  ;; (with-eval-after-load 'winum
+  ;;   (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  ;; :config
+  ;; (progn
+  ;; (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+  ;;       treemacs-deferred-git-apply-delay        0.5
+  ;; treemacs-directory-name-transformer      #'identity
+  ;;       treemacs-display-in-side-window          t
+  ;;       treemacs-eldoc-display                   t
+  ;;       treemacs-file-event-delay                5000
+  ;;       treemacs-file-extension-regex            treemacs-last-period-regex-value
+  ;;       treemacs-file-follow-delay               0.2
+  ;;       treemacs-file-name-transformer           #'identity
+  ;;       treemacs-follow-after-init               t
+  ;;       treemacs-expand-after-init               t
+  ;;       treemacs-git-command-pipe                ""
+  ;;       treemacs-goto-tag-strategy               'refetch-index
+  ;;       treemacs-indentation                     2
+  ;;       treemacs-indentation-string              " "
+  ;;       treemacs-is-never-other-window           nil
+  ;;       treemacs-max-git-entries                 5000
+  ;;       treemacs-missing-project-action          'ask
+  ;;       treemacs-move-forward-on-expand          nil
+  ;;       treemacs-no-png-images                   nil
+  ;;       treemacs-no-delete-other-windows         t
+  ;;       treemacs-project-follow-cleanup          nil
+  ;;       treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+  ;;       treemacs-position                        'left
+  ;;       treemacs-read-string-input               'from-child-frame
+  ;;       treemacs-recenter-distance               0.1
+  ;;       treemacs-recenter-after-file-follow      nil
+  ;;       treemacs-recenter-after-tag-follow       nil
+  ;;       treemacs-recenter-after-project-jump     'always
+  ;;       treemacs-recenter-after-project-expand   'on-distance
+  ;;       treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+  ;;       treemacs-show-cursor                     nil
+  ;;       treemacs-show-hidden-files               t
+  ;;       treemacs-silent-filewatch                nil
+  ;;       treemacs-silent-refresh                  nil
+  ;;       treemacs-sorting                         'alphabetic-asc
+  ;;       treemacs-select-when-already-in-treemacs 'move-back
+  ;;       treemacs-space-between-root-nodes        t
+  ;;       treemacs-tag-follow-cleanup              t
+  ;;       treemacs-tag-follow-delay                1.5
+  ;;       treemacs-text-scale                      nil
+  ;;       treemacs-user-mode-line-format           nil
+  ;;       treemacs-user-header-line-format         nil
+  ;;       treemacs-wide-toggle-width               70
+  ;;       treemacs-width                           35
+  ;;       treemacs-width-increment                 1
+  ;;       treemacs-width-is-initially-locked       t
+  ;;       treemacs-workspace-switch-cleanup        nil)
+
+  ;; The default width and height of the icons is 22 pixels. If you are
+  ;; using a Hi-DPI display, uncomment this to double the icon size.
+  ;;(treemacs-resize-icons 44)
+
+  ;; (treemacs-follow-mode t)
+  ;; (treemacs-filewatch-mode t)
+  ;; (treemacs-fringe-indicator-mode 'always)
+
+  ;; (pcase (cons (not (null (executable-find "git")))
+  ;;              (not (null treemacs-python-executable)))
+  ;;   (`(t . t)
+  ;;    (treemacs-git-mode 'deferred))
+  ;;   (`(t . _)
+  ;;    (treemacs-git-mode 'simple)))
+
+  ;; (treemacs-hide-gitignored-files-mode nil))
+  ;; :bind
+  ;; (:map global-map
+  ;;       ("M-0"       . treemacs-select-window)
+  ;;       ("C-x t 1"   . treemacs-delete-other-windows)
+  ;;       ("C-x t t"   . treemacs)
+  ;;       ("C-x t B"   . treemacs-bookmark)
+  ;;       ("C-x t C-t" . treemacs-find-file)
+  ;;       ("C-x t M-t" . treemacs-find-tag)))
+  )
+
+(use-package treemacs-evil
+  :after (treemacs evil))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile))
+
+;; (use-package treemacs-icons-dired
+;;   :hook (dired-mode . treemacs-icons-dired-enable-once))
+
+(use-package treemacs-magit
+  :after (treemacs magit))
+#+END_SRC
+
+** Git and other VC
+
+|=magit=|https://magit.vc/|
+
+Complete text-based user interface to git.
+
+#+BEGIN_SRC emacs-lisp
+(use-package magit)
+#+END_SRC
+
+# TODO
+
+#+BEGIN_SRC emacs-lisp2
+(use-package git-gutter-fringe
+  :preface
+  (defun cunene/git-gutter-enable ()
+    (when-let* ((buffer (buffer-file-name))
+                (backend (vc-backend buffer)))
+      (require 'git-gutter)
+      (require 'git-gutter-fringe)
+      (git-gutter-mode 1)))
+  :hook
+  (after-change-major-mode . cunene/git-gutter-enable)
+  :config
+  (define-fringe-bitmap 'git-gutter-fr:added [255] nil nil '(center t))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [255 255 255 255] nil nil 'bottom)
+  (define-fringe-bitmap 'git-gutter-fr:modified [255] nil nil '(center t)))
+
+(use-package git-messenger
+  :bind ("C-x G" . git-messenger:popup-message)
+  :config
+  (setq git-messenger:show-detail t
+        git-messenger:use-magit-popup t))
+#+END_SRC
+
+** Highlight keywords
+
+| =hl-todo= | https://github.com/tarsius/hl-todo |
+
+Highlight TODO and similar keywords in comments and strings.
+
+#+BEGIN_SRC emacs-lisp :results t
+(use-package hl-todo
+  :init
+  (setq hl-todo-keyword-faces
+        '(("TODO"  . "#CC4500")
+          ("WIP"   . "#CC4500")
+          ("NOTE"  . "#CCCC93")
+          ("FIXME" . "#CC9393")
+          ("XXX+"  . "#CC9393")
+          ("FAIL"  . "#8C5353")
+          ("DONE"  . "#AFD8AF")
+          ("HACK"  . "#A020F0")
+          ("BUG"   . "#A020F0")))
+  (defun me//hl-todo-helm-occur (regexp)
+    (let ((isearch-string regexp)
+          (isearch-regexp t))
+      (call-interactively 'helm-occur-from-isearch)))
+  (defun me/hl-todo-helm-occur ()
+    "Interactively list all keyword occurrences."
+    (interactive)
+    (me//hl-todo-helm-occur
+     "TODO\\|WIP\\|NOTE\\|FIXME\\|XXX\\|FAIL\\|DONE\\|HACK\\|BUG"))
+  (defun me/hl-todo-helm-occur-strict ()
+    "Interactively list all keyword occurrences with a trailing ':'."
+    (interactive)
+    (me//hl-todo-helm-occur
+     "TODO:\\|WIP:\\|NOTE:\\|FIXME:\\|XXX:\\|FAIL:\\|DONE:\\|HACK:\\|BUG:"))
+  :config
+  (global-hl-todo-mode 1) ; BUG: not working properly
+  (add-hook 'text-mode-hook 'hl-todo-mode)
+  (add-hook 'prog-mode-hook 'hl-todo-mode))
+#+END_SRC
+
+Transient state for navigating among TODOs in a file.
+
+#+BEGIN_SRC emacs-lisp
+(defun me//transient-hl-todo()(interactive))
+(general-def
+  :prefix-map 'transient-hl-todo-map
+  "q"    '(:ignore t :which-key "quit")
+  "q"   #'me//transient-hl-todo
+  "k" 'hl-todo-previous
+  "j" 'hl-todo-next)
+
+(hercules-def
+ :toggle-funs #'me//transient-hl-todo
+ :keymap 'transient-hl-todo-map
+ :transient t)
+#+END_SRC
+
+** Indentation
+
+| =aggresive-indent= | https://github.com/Malabarba/aggressive-indent-mode |
+
+Minor mode that keeps your code always indented.
+
+#+BEGIN_SRC emacs-lisp
+;;  (use-package aggressive-indent
+;;    :config
+;;   (add-hook 'prog-mode-hook #'aggressive-indent-mode))
+#+END_SRC
+
+** Jump history
+
+| =evil-jumps= | https://github.com/emacs-evil/evil/blob/master/evil-jumps.el |
+
+Also see =better-jumper= as alternative: A configurable jump list implementation
+for Emacs that can be used to easily jump back to previous locations.
+
+#+BEGIN_SRC emacs-lisp
+(defun me//evil-set-jump(orig-fn &rest args)
+  (evil-set-jump)
+  (apply orig-fn args))
+
+(advice-add 'find-function :around #'me//evil-set-jump)
+(advice-add 'find-variable :around #'me//evil-set-jump)
+;; (advice-add 'lsp-find-references :around #'me//evil-set-jump)
+;; (advice-add 'lsp-find-definition :around #'me//evil-set-jump)
+;; (advice-add 'lsp-find-declaration :around #'me//evil-set-jump)
+;; (advice-add 'lsp-find-implementation :around #'me//evil-set-jump)
+;; (advice-add 'lsp-find-type-definitio:around #'me//evil-set-jump)
+;; (advice-add 'lsp-find-locations :around #'me//evil-set-jump)
+;; (advice-add 'lsp-show-xref :around #'me//evil-set-jump)
+;; (advice-add 'xref-find-apropos :around #'me//evil-set-jump)
+
+(defun me//transient-jump()(interactive))
+(general-def
+  :prefix-map 'transient-jump-map
+  "q" '(:ignore t :which-key "quit5")
+  "q" 'me//transient-jump
+  "j" '(:ignore t :which-key "jump next")
+  "j" 'evil-jump-forward
+  "k" '(:ignore t :which-key "jump previous")
+  "k" 'evil-jump-backward)
+(hercules-def
+ :toggle-funs 'me//transient-jump
+ :keymap 'transient-jump-map
+ :transient t)
+#+END_SRC
+
+** Language Server Protocol (TAGS)
+
+| =lsp-mode= | https://emacs-lsp.github.io/lsp-mode |
+
+From what I've tested LSP works almost flawlessly for Fortran and C/C++. It
+needs some external help though as it can't function without the
+language-specific LSP server.
+
+For Fortran you need =fortls= installed in the PATH and for C/C++ I've only
+tested =clangd=. The LSP server will parse your source code so it should work
+okay out of the box.
+
+For better tags-matching I strongly recommend using the CMake option
+=-DCMAKE_EXPORT_COMPILE_COMMANDS=1= which generates a =compile_commands.json= in
+the compilation folder.
+
+Then simply copy it to your project root folder (where .git, .svn or .projectile
+resides) or make a symbolic link.
+
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode
+  :init
+  (setq-default lsp-keymap-prefix "C-c l")
+  :hook ((f90-mode . lsp)
+         (fortran-mode . lsp)
+         (c-mode . lsp)
+         (c++-mode . lsp)
+         (c-or-c++-mode . lsp)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+#+END_SRC
+
+** Projects
+
+Manage your project with projectile.
+
+It's important to redefine the svn and generic command here. By default, the
+generic grep command is slow on large projects. Also the default svn command
+queries information on the repository, which requires a connection.
+
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :init
+  (setq projectile-sort-order 'recentf
+        projectile-generic-command "rg --files"
+        projectile-svn-command "rg --files"
+        projectile-mode-line-prefix " Proj"
+        projectile-enable-caching t
+        projectile-cache-file (me/cache-concat "projectile.cache")
+        projectile-known-projects-file (me/cache-concat "projectile-bookmarks.eld"))
+  :config
+  (projectile-mode 1))
+#+END_SRC
+
+** Snippets
+
+| =yasnippet= | https://github.com/joaotavora/yasnippet |
+
+YASnippet is a template system for Emacs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :config
+  (yas-global-mode 1))
+#+END_SRC
+
+** Syntax Checking
+
+| =flycheck= | https://github.com/flycheck/flycheck |
+
+Modern on-the-fly syntax checking.
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :init (global-flycheck-mode)
+  :config
+  (add-hook 'after-init-hook #'global-flycheck-mode))
+#+END_SRC
+
+** Undo history
+
+Never lose undo history with this package.
+
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :init
+  :config
+  ;; FIXME: find out why putting this in :init doesn't work
+  (setq undo-tree-visualizer-diff t
+        undo-tree-visualizer-timestamps t)
+  (global-undo-tree-mode 1))
+#+END_SRC
+
+** Window auo-resize
+
+| =golden-ratio= | https://github.com/roman/golden-ratio.el |
+
+Automatic resizing of Emacs windows to the golden ratio.
+
+#+BEGIN_SRC emacs-lisp
+(use-package golden-ratio
+  :config
+  (golden-ratio-mode 0))
+#+END_SRC
+
+** Whitespaces
+
+| =whitespace= | Built-in                            |
+| =ws-butler=  | https://github.com/lewang/ws-butler |
+
+Unobtrusively trim spaces from end of line. Only affect modified lines.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ws-butler
+  :config
+  (ws-butler-global-mode 1))
+#+END_SRC
+
+Prevent trailing space on sentence.
+
+#+BEGIN_SRC emacs-lisp
+(setq sentence-end-double-space nil)
+#+END_SRC
+
+Highlight trailing space-like characters, eg. trailing spaces, tabs, empty
+lines.
+
+#+BEGIN_SRC emacs-lisp
+(use-package whitespace
+  :hook
+  (prog-mode . whitespace-mode)
+  (text-mode . whitespace-mode)
+  :custom
+  (whitespace-style '(face empty indentation::space tab trailing)))
+#+END_SRC
+
+** Workspaces
+
+| =eyebrowse= | https://depp.brause.cc/eyebrowse/ |
+
+A simple-minded way of managing window configs in Emacs.
+
+#+BEGIN_QUOTE
+=eyebrowse= is a global minor mode for Emacs that allows you to manage your
+window configurations in a simple manner, just like tiling window managers like
+=i3wm= with their workspaces do. It displays their current state in the modeline
+by default. The behaviour is modeled after =ranger=, a file manager written in
+Python.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package eyebrowse
+  :init
+  (setq eyebrowse-new-workspace t
+        eyebrowse-default-workspace-slot 0)
+  :config
+  (eyebrowse-mode t))
+#+END_SRC
+
+* Config
+** Automatically refresh buffer when file changed on disk
+
+#+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode t)
+(setq auto-revert-interval 1)
+#+END_SRC
+
+** Create the saved file's parent directories if necessary
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'before-save-hook
+          (lambda ()
+            (when buffer-file-name
+              (let ((dir (file-name-directory buffer-file-name)))
+                (when (and (not (file-exists-p dir))
+                           (y-or-n-p (format "Directory %s does not exist. Create it?" dir)))
+                  (make-directory dir t))))))
+#+END_SRC
+
+** Files and modes association
+
+#+BEGIN_SRC emacs-lisp
+(setq auto-mode-alist
+      (append (mapcar 'purecopy '(
+                                  ("PKGBUILD$"     . sh-mode)
+                                  ("[mM]akefile"   . makefile-mode)
+                                  ("[mM]akefile.*" . makefile-mode)
+                                  ("\\.cpp$"       . c-mode)
+                                  ("\\.hip$"       . c-mode)
+                                  ("\\.cu$"        . c-mode)
+                                  ("\\.cl$"        . c-mode)
+                                  ("\\.c.simp$"    . c-mode)
+                                  ("\\.h.simp$"    . c-mode)
+                                  ))
+              auto-mode-alist))
+#+END_SRC
+
+** Help / Info
+
+# FIXME: wrong solution to show help menu
+#+BEGIN_SRC emacs-lisp
+(defun me//transient-toggle-info()(interactive))
+(general-def
+  :prefix-map 'transient-info-map
+  "q"   '(:ignore t :which-key "hide")
+  "q"   #'me//transient-toggle-info
+  "g["  'Info-prev-reference
+  "g]"  'Info-next-reference
+  "C-o" 'Info-history-back
+  "C-i" 'Info-history-forward
+  "RET" 'Info-follow-nearest-node
+  "C-]" 'Info-follow-nearest-node
+  "C-j" 'Info-forward-node
+  "C-k" 'Info-backward-node
+  "d"   'Info-directory
+  "u"   'Info-up
+  "s"   'Info-search
+  "S"   'Info-search-case-sensitively
+  "gG"  'Info-goto-node
+  "gm"  'Info-menu
+  "gt"  'Info-top-node
+  "gT"  'Info-toc
+  "gf"  'Info-follow-reference
+  "gj"  'Info-next
+  "gk"  'Info-prev)
+(hercules-def
+ :toggle-funs #'me//transient-toggle-info
+ :keymap 'transient-info-map
+ :transient nil)
+#+END_SRC
+
+** Line numbers
+
+Functions to toggle line numbers. Now built-in in emacs.
+
+#+BEGIN_SRC emacs-lisp
+(defvar-local me--absolute-line-numbers t)
+(defun me/toggle-display-line-numbers()
+  "Toggle line numbers and remember if displaying absolute or relative line
+  numbers."
+  (interactive)
+  (if (not (eq display-line-numbers nil))
+      (setq display-line-numbers nil)
+    (setq display-line-numbers me--absolute-line-numbers)))
+
+(defun me/toggle-display-relative-line-numbers()
+  (interactive)
+  (if (eq display-line-numbers 'relative)
+      (setq display-line-numbers t
+            me--absolute-line-numbers t)
+    (setq display-line-numbers 'relative
+          me--absolute-line-numbers 'relative)))
+#+END_SRC
+
+** Org-mode
+
+Enable =babel= for more languages.
+
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages 'org-babel-load-languages
+                             '((emacs-lisp . t)
+                               (shell . t)))
+#+END_SRC
+
+Add a new babel header =:session-reset= to reinitialize a session.
+
+TODO: figure out why it needs to be language specific.
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-babel-after-execute-hook 'me//ob-args-ext-session-reset)
+
+(defun me//ob-args-ext-session-reset()
+  (let* ((src-block-info (org-babel-get-src-block-info 'light))
+         (arguments (nth 2 src-block-info))
+         (should-reset (member '(:session-reset . "yes") arguments))
+         (session (cdr (assoc :session arguments))))
+    (if should-reset
+        (progn (message (format "proc %s" (get-buffer-process session)))
+               (kill-process (get-buffer-process session))
+               (kill-buffer session)))))
+#+END_SRC
+
+** Remote file editing
+*** Tramp
+
+#+BEGIN_SRC emacs-lisp
+(use-package tramp
+  :init
+  (setq tramp-default-method "scp"))
+#+END_SRC
+
+In order to open a file on a remote machine, you can use,
+
+~SPC f f /user@your.host.com:/path/to/file~
+
+TRAMP mode can also be used to edit files on the same machine as
+another user, if you want to open some file as root you can use,
+
+~SPC f f /root@127.0.0.1:/path/to/file~
+
+We explicitly tell tramp to /leave ControlMaster the fuck alone/, so that the
+defaults in =.ssh/config= actually work:
+
+#+BEGIN_SRC emacs-lisp
+(eval-after-load (if (locate-library "tramp-sh") "tramp-sh" "tramp")
+  '(progn (setq tramp-use-ssh-controlmaster-options nil)))
+#+END_SRC
+
+*** SSH agent
+
+#+BEGIN_SRC emacs-lisp
+;;  (setenv "SSH_AUTH_SOCK" (concat (getenv "HOME") "/.ssh-auth-sock"))
+#+END_SRC
+
+** Remove dots in helm buffer
+
+| =no-dots= | https://github.com/TheBB/spacemacs-layers/tree/master/layers/no-dots |
+FIXME: not working
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(defvar no-dots-whitelist '()
+  "List of helm buffers in which to show dots.")
+
+(defun no-dots//whitelisted-p ()
+  (member (with-helm-buffer (buffer-name)) no-dots-whitelist))
+
+(defun no-dots//helm-ff-filter-candidate-one-by-one (fcn file)
+  (when (or (no-dots//whitelisted-p)
+            (not (string-match "\\(?:/\\|\\`\\)\\.\\{1,2\\}\\'" file)))
+    (funcall fcn file)))
+
+(defun no-dots//helm-file-completion-source-p (&rest args) t)
+
+(defun no-dots//helm-attrset (fcn attribute-name value &optional src)
+  (let ((src (or src (helm-get-current-source))))
+    (when src
+      (funcall fcn attribute-name value src))))
+
+(defun no-dots//helm-find-files-up-one-level (fcn &rest args)
+  (advice-add 'helm-file-completion-source-p
+      :around 'no-dots//helm-file-completion-source-p)
+  (advice-add 'helm-attrset
+      :around 'no-dots//helm-attrset)
+  (let ((res (apply fcn args)))
+    (advice-remove 'helm-file-completion-source-p
+                   'no-dots//helm-file-completion-source-p)
+    (advice-remove 'helm-attrset
+                   'no-dots//helm-attrset)
+    res))
+
+(defun no-dots/post-init-helm ()
+  (with-eval-after-load 'helm-files
+    (advice-add 'helm-ff-filter-candidate-one-by-one
+        :around 'no-dots//helm-ff-filter-candidate-one-by-one)
+    (advice-add 'helm-find-files-up-one-level
+        :around 'no-dots//helm-find-files-up-one-level)))
+
+(no-dots/post-init-helm)
+#+END_SRC
+
+* Languages
+** Bash
+
+Make file starting with shebang executable on save.
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'after-save-hook
+          'executable-make-buffer-file-executable-if-script-p)
+#+END_SRC
+
+** Build system
+
+| =cmake-mode= | https://github.com/Kitware/CMake       |
+| =meson-mode= | https://github.com/wentasah/meson-mode |
+
+#+BEGIN_SRC emacs-lisp
+(use-package cmake-mode)
+(use-package meson-mode)
+#+END_SRC
+
+** Markdown
+
+| =markdown-mode= | https://github.com/jrblevin/markdown-mode |
+
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode
+  :mode (rx (or "INSTALL" "CONTRIBUTORS" "LICENSE" "README" ".mdx") eos))
+#+END_SRC
+
+** Org
+
+| =org= | Built-in |
+
+This file is organized with =org-mode=, a plain text notes and project planning
+tool for Emacs.
+
+| TODO | Check out =org-capture= |
+
+#+BEGIN_SRC emacs-lisp
+(use-package org
+  :custom
+  ;;(org-adapt-indentation nil)
+  (org-confirm-babel-evaluate t)
+  ;;(org-cycle-separator-lines 0)
+  ;;(org-descriptive-links nil) ; TODO: toggle
+  (org-edit-src-content-indentation 0)
+  (org-edit-src-persistent-message t)
+  (org-fontify-done-headline t)
+  (org-fontify-quote-and-verse-blocks t)
+  (org-fontify-whole-heading-line t)
+  (org-return-follows-link t)
+  ;;(org-src-tab-acts-natively t)
+  (org-src-window-setup 'current-window))
+
+;;(org-startup-truncated nil)
+;;(org-support-shift-select 'always)
+(with-eval-after-load 'evil
+  (evil-define-key 'normal org-mode-map
+    (kbd "<tab>") #'org-cycle))
+;;     (kbd "C-j") #'me/org-show-next-heading-tidily
+;;     (kbd "C-k") #'me/org-show-previous-heading-tidily)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+
+;; (defun me/org-cycle-parent (argument)
+;;   "Go to the nearest parent heading and execute `org-cycle'."
+;;   (interactive "p")
+;;   (if (org-at-heading-p)
+;;       (outline-up-heading argument)
+;;     (org-previous-visible-heading argument))
+;;   (org-cycle))
+
+(defun me/org-show-next-heading-tidily ()
+  "Show next entry, keeping other entries closed."
+  (interactive)
+  (if (save-excursion (end-of-line) (outline-invisible-p))
+      (progn (org-show-entry) (outline-show-children))
+    (outline-next-heading)
+    (unless (and (bolp) (org-at-heading-p))
+      (org-up-heading-safe)
+      (outline-hide-subtree)
+      (user-error "Boundary reached"))
+    (org-overview)
+    (org-reveal t)
+    (org-show-entry)
+    (outline-show-children)))
+
+(defun me/org-show-previous-heading-tidily ()
+  "Show previous entry, keeping other entries closed."
+  (interactive)
+  (let ((pos (point)))
+    (outline-previous-heading)
+    (unless (and (< (point) pos) (bolp) (org-at-heading-p))
+      (goto-char pos)
+      (outline-hide-subtree)
+      (user-error "Boundary reached"))
+    (org-overview)
+    (org-reveal t)
+    (org-show-entry)
+    (outline-show-children)))
+#+END_SRC
+
+** YAML
+
+| =yaml-mode= | https://github.com/yoshiki/yaml-mode |
+
+#+BEGIN_SRC emacs-lisp
+(use-package yaml-mode)
+#+END_SRC
+
+* Keybinds
+** No prefix
+
+#+BEGIN_SRC emacs-lisp
+(general-def
+  :prefix nil
+  :keymap 'evil-motion-state-map
+  "C-y" (lambda()(interactive)(evil-scroll-line-up 2))
+  "C-e" (lambda()(interactive)(evil-scroll-line-down 2))
+  "C-u" 'evil-scroll-up)
+
+;; ;; TODO: disable ',' key everywhere
+;; (general-def
+;;  :prefix nil
+;;  :states '(normal visual motion)
+;;  :keymaps '(fundamental-mode prog-mode-map text-mode-map)
+;;  "," nil)
+
+(me/leader-def
+  :states '(normal visual)
+  "SPC" 'helm-M-x
+  ","   'evil-snipe-repeat-reverse
+  "TAB" 'crux-other-window-or-switch-buffer
+  "u"   'universal-argument)
+;; "'" 'shell-pop)
+#+END_SRC
+
+** Per Mode
+*** C/C++
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-mode-def
+  :keymaps '(c-mode-map c++-mode-map)
+  "o" 'lsp-clangd-find-other-file)
+#+END_SRC
+
+*** lisp-mode
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-mode-def
+  :keymaps '(lisp-mode-shared-map)
+  :states '(normal visual)
+  "c"  'check-parens
+  "e"  '(:ignore t :which-key "eval")
+  "eb" 'eval-buffer
+  "er" 'eval-region
+  "jf" 'find-function
+  "jF" 'find-function-other-window
+  "jv" 'find-variable
+  "jV" 'find-variable-other-window)
+#+END_SRC
+
+*** info-mode
+
+# FIXME: not working
+#+BEGIN_SRC emacs-lisp :tangle no
+(me/leader-mode-def
+  :keymaps 'info-mode-map
+  "h" '(:ignore t :which-key "navigation help")
+  "h" 'me//transient-toggle-info)
+#+END_SRC
+
+*** org-mode
+
+#+BEGIN_SRC emacs-lisp
+(general-def ; FIXME: not working
+  :prefix nil
+  :keymap 'org-mode-map
+  "C-j" 'me/org-show-next-heading-tidily
+  "C-k" 'me/org-show-previous-heading-tidily)
+(me/leader-mode-def
+  :keymaps 'org-mode-map
+  "b"  '(:ignore t :which-key "babel")
+  "be" 'org-edit-special
+  "bx" 'org-babel-execute-src-block-maybe
+  "bk" 'org-babel-previous-src-block
+  "bj" 'org-babel-next-src-block
+  "i"  '(:ignore t :which-key "insert")
+  "ip" 'org-set-property
+  "id" 'org-deadline
+  "j"  '(:ignore t :which-key "jump")
+  "jf" 'find-function
+  "jF" 'find-function-other-window
+  "jv" 'find-variable
+  "jV" 'find-variable-other-window
+  "t"  '(:ignore t :which-key "tangle")
+  "tt"  'org-babel-tangle
+  "tf"  'org-babel-tangle-file
+  "td"  'org-babel-detangle
+  "e"  'org-export-dispatch)
+#+END_SRC
+
+Define keybind for =org-edit-special= buffers. It's a bit tricky here since we
+want those bindings to be active only in =org-src-mode= without interfering with
+the major mode keybind. We choose =,,= for the prefix.
+
+#+BEGIN_SRC emacs-lisp
+;; Disable default binding, which has the side effect of auto-documenting the
+;; new keybind.
+(general-unbind 'org-src-mode-map :with org-edit-src-exit)
+(general-unbind 'org-src-mode-map :with org-edit-src-abort)
+
+;; XXX: why can't I use general
+;; TODO: change prefix string
+(evil-define-minor-mode-key 'normal 'org-src-mode
+  (kbd ",,q") 'org-edit-src-exit
+  (kbd ",,s") 'org-edit-src-save
+  (kbd ",,k") 'org-edit-src-abort)
+#+END_SRC
+
+*** prog-mode
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-mode-def
+  :keymaps 'prog-mode-map
+  "l" '(:ignore t :which-key "lsp")
+  "l"  (general-simulate-key "C-c l")
+
+  "="  '(:ignore t :which-key "formatting")
+  "==" '(:ignore t :which-key "format buffer")
+  "==" 'lsp-format-buffer ; (or (lsp-feature? "textDocument/rangeFormatting")
+                                        ;(lsp-feature? "textDocument/formatting"))
+  "=r" '(:ignore t :which-key "format region")
+  "=r" 'lsp-format-region ; (lsp-feature? "textDocument/rangeFormatting")
+
+  "a"  '(:ignore t :which-key "code actions")
+  "aa" '(:ignore t :which-key "code actions")
+  "aa" 'lsp-execute-code-action ; (lsp-feature? "textDocument/codeAction")
+  "ah" '(:ignore t :which-key "highlight symbol")
+  "ah" 'lsp-document-highlight ; (lsp-feature? "textDocument/documentHighlight")
+  "al" '(:ignore t :which-key "lens")
+  "al" 'lsp-avy-lens ; (and (bound-and-true-p lsp-lens-mode) (featurep 'avy))
+
+  "f"  '(:ignore t :which-key "folders")
+  "fa" '(:ignore t :which-key "add folder")
+  "fa" 'lsp-workspace-folders-add
+  "fb" '(:ignore t :which-key "un-blacklist folder")
+  "fb" 'lsp-workspace-blacklist-remove
+  "fr" '(:ignore t :which-key "remove folder")
+  "fr" 'lsp-workspace-folders-remove
+
+  "g"  '(:ignore t :which-key "goto")
+  "gs" '(:ignore t :which-key "find symbol in workspace")
+  "gs" 'xref-find-apropos ; (lsp-feature? "workspace/symbol")
+  "gc" '(:ignore t :which-key "find declarations")
+  "gc" 'lsp-find-declaration ; (lsp-feature? "textDocument/declaration")
+  "ge" '(:ignore t :which-key "show errors")
+  "ge" 'lsp-treemacs-errors-list ; (fboundp 'lsp-treemacs-errors-list)
+  "gd" '(:ignore t :which-key "find definitions")
+  "gd" 'lsp-find-definition ; (lsp-feature? "textDocument/definition")
+  "gD" '(:ignore t :which-key "find definitions other window")
+  "gD" 'xref-find-definitions-other-window
+  "gh" '(:ignore t :which-key "call hierarchy")
+  "gh" 'lsp-treemacs-call-hierarchy ; (and (lsp-feature? "callHierarchy/incomingCalls")
+                                        ;(fboundp 'lsp-treemacs-call-hierarchy))
+  "gi" '(:ignore t :which-key "find implementations")
+  "gi" 'lsp-find-implementation ; (lsp-feature? "textDocument/implementation")
+  "gr" '(:ignore t :which-key "find references")
+  "gr" 'lsp-find-references ; (lsp-feature? "textDocument/references")
+  "gt" '(:ignore t :which-key "find type definition")
+  "gt" 'lsp-find-type-definition ; (lsp-feature? "textDocument/typeDefinition")
+
+  "h"  '(:ignore t :which-key "help")
+  "hg" '(:ignore t :which-key "glance symbol")
+  "hg" 'lsp-ui-doc-glance ; (and (featurep 'lsp-ui-doc) (lsp-feature? "textDocument/hover"))
+  "hh" '(:ignore t :which-key "describe symbol at point")
+  "hh" 'lsp-describe-thing-at-point ; (lsp-feature? "textDocument/hover")
+  "hs" '(:ignore t :which-key "signature help")
+  "hs" 'lsp-signature-activate ; (lsp-feature? "textDocument/signatureHelp")
+
+  "p"  '(:ignore t :which-key "peek")
+  "pd" '(:ignore t :which-key "peek definitions")
+  "pd" 'lsp-ui-peek-find-definitions ; (and (lsp-feature? "textDocument/definition")
+                                        ;(fboundp 'lsp-ui-peek-find-definitions))
+  "pi" '(:ignore t :which-key "peek implementations")
+  "pi" 'lsp-ui-peek-find-implementation ; (and (fboundp 'lsp-ui-peek-find-implementation)
+                                        ;(lsp-feature? "textDocument/implementation"))
+  "pr" '(:ignore t :which-key "peek references")
+  "pr" 'lsp-ui-peek-find-references ; (and (fboundp 'lsp-ui-peek-find-references)
+                                        ;(lsp-feature? "textDocument/references"))
+  "ps" '(:ignore t :which-key "peek workspace symbol")
+  "ps" 'lsp-ui-peek-find-workspace-symbol ; (and (fboundp 'lsp-ui-peek-find-workspace-symbol)
+                                        ;(lsp-feature? "workspace/symbol")))))
+  "r"  '(:ignore t :which-key "refactor")
+  "ro" '(:ignore t :which-key "organize imports")
+  "ro" 'lsp-organize-imports ; (lsp-feature? "textDocument/codeAction")
+  "rr" '(:ignore t :which-key "rename")
+  "rr" 'lsp-rename ; (lsp-feature? "textDocument/rename")
+
+  "t"  '(:ignore t :which-key "toggle")
+  "tL" '(:ignore t :which-key "toggle log io")
+  "tL" 'lsp-toggle-trace-io ; t
+  "tS" '(:ignore t :which-key "toggle sideline")
+  "tS" 'lsp-ui-sideline-mode ; (featurep 'lsp-ui-sideline)
+  "tT" '(:ignore t :which-key "toggle treemacs integration")
+  "tT" 'lsp-treemacs-sync-mode ; (featurep 'lsp-treemacs)
+  "ta" '(:ignore t :which-key "toggle modeline code actions")
+  "ta" 'lsp-modeline-code-actions-mode ; (lsp-feature? "textDocument/codeAction")
+  "tb" '(:ignore t :which-key "toggle breadcrumb")
+  "tb" 'lsp-headerline-breadcrumb-mode ; (lsp-feature? "textDocument/documentSymbol")
+  "td" '(:ignore t :which-key "toggle documentation popup")
+  "td" 'lsp-ui-doc-mode ; (featurep 'lsp-ui-doc)
+  "tf" '(:ignore t :which-key "toggle on type formatting")
+  "tf" 'lsp-toggle-on-type-formatting ; (lsp-feature? "textDocument/onTypeFormatting")
+  "th" '(:ignore t :which-key "toggle highlighting")
+  "th" 'lsp-toggle-symbol-highlight ; (lsp-feature? "textDocument/documentHighlight")
+  "tl" '(:ignore t :which-key "toggle lenses")
+  "tl" 'lsp-lens-mode ; (lsp-feature? "textDocument/codeLens")
+  "ts" '(:ignore t :which-key "toggle signature")
+  "ts" 'lsp-toggle-signature-auto-activate ; (lsp-feature? "textDocument/signatureHelp")
+
+  "w"  '(:ignore t :which-key "workspaces")
+  "wD" '(:ignore t :which-key "disconnect")
+  "wD" 'lsp-disconnect ; (lsp-workspaces)
+  "wd" '(:ignore t :which-key "describe session")
+  "wd" 'lsp-describe-session
+  "wq" '(:ignore t :which-key "shutdown server")
+  "wq" 'lsp-workspace-shutdown ; (lsp-workspaces)
+  "wr" '(:ignore t :which-key "restart server")
+  "wr" 'lsp-workspace-restart ; (lsp-workspaces)
+  "ws" '(:ignore t :which-key "start server")
+  "ws" 'lsp)
+#+END_SRC
+
+** [=] Format
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "=="   'spacemacs/indent-region-or-buffer
+  "=o"   'open-line
+  "=s"   '(:ignore t :which-key "sort")
+  "=S"   'spacemacs/split-and-new-line
+  "=sl"  '(:ignore t :which-key "sort lines")
+  "=slc" 'me/sort-lines-case
+  "=slC" 'me/sort-lines-case-reverse
+  "=sll" 'me/sort-lines
+  "=slL" 'me/sort-lines-reverse
+  "=sp"  '(:ignore t :which-key "sort paragraphs")
+  "=spc" 'me/sort-paragraphs-case
+  "=spC" 'me/sort-paragraphs-case-reverse
+  "=spp" 'me/sort-paragraphs
+  "=spP" 'me/sort-paragraphs-reverse)
+#+END_SRC
+
+** [a]applications
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "a" '(:ignore t :which-key "applications")
+  "aj" 'jump-tree-visualize
+  "at" '(:ignore t :which-key "treemacs")
+  "att" 'treemacs
+  "ats" 'treemacs-select-window
+  "atf" 'treemacs-find-file
+  "atg" 'treemacs-find-tags
+  "au" 'undo-tree-visualize)
+#+END_SRC
+
+** [b]uffers
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "b"  '(:ignore t :which-key "buffers")
+  ;; FIXME: prettify this
+  "bB" 'helm-mini
+  "bb" 'switch-to-buffer
+  "bd" 'kill-this-buffer
+  "bk" 'kill-buffer
+  "bD" 'crux-kill-other-buffers
+  "bo" '(:ignore t :which-key "crux-open-with...")
+  "bo" '(lambda ()(interactive) (crux-open-with t))
+  "bs" 'me/switch-to-scratch
+  "bm" 'me/switch-to-messages
+  "bt" 'crux-transpose-windows
+  "bO" 'crux-open-with)
+#+END_SRC
+
+** [c]omment
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  :states '(normal visual)
+  "ci"  'evilnc-comment-or-uncomment-lines
+  "cl"  'evilnc-quick-comment-or-uncomment-to-the-line
+  "cc"  'evilnc-copy-and-comment-lines
+  "cp"  'evilnc-comment-or-uncomment-paragraphs
+  "cr"  'comment-or-uncomment-region
+  "cv"  'evilnc-toggle-invert-comment-line-by-line)
+;; "c."  'evilnc-copy-and-comment-operator
+;; "c\\" 'evilnc-comment-operator
+#+END_SRC
+
+** [e]rrors
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "e" '(:ignore t :which-key "errors, flycheck")
+  "ek" 'flycheck-previous-error
+  "ej" 'flycheck-next-error
+  "eb" 'flycheck-buffer
+  "ec" 'flycheck-clear
+  "eh" 'flycheck-describe-checker
+  "el" 'flycheck-list-errors
+  "ee" 'flycheck-explain-error-at-point
+  "es" 'flycheck-select-checker
+  "eS" 'flycheck-set-checker-executable
+  "ev" 'flycheck-verify-setup)
+;; "eH" 'display-local-help
+;; "eh" 'flycheck-display-error-at-point
+;; "ex" 'flycheck-disable-checker
+;; "ei" 'flycheck-manual
+;; "eC-c" 'flycheck-compile
+;; "eV" 'flycheck-version
+;; "eC-w" 'flycheck-copy-errors-as-kill
+;; "el" 'spacemacs/toggle-flycheck-error-list
+;; "eL" 'spacemacs/goto-flycheck-error-list
+#+END_SRC
+
+#+BEGIN_SRC
+ "eN" 'spacemacs/previous-error
+ "ep" 'spacemacs/previous-error
+ "eb" 'flycheck-buffer
+ "ec" 'flycheck-clear
+ "eh" 'flycheck-describe-checker
+ ;; "el" 'spacemacs/toggle-flycheck-error-list
+ "el" 'flycheck-list-errors
+ ;; "eL" 'spacemacs/goto-flycheck-error-list
+ "ee" 'flycheck-explain-error-at-point
+ "es" 'flycheck-select-checker
+ "eS" 'flycheck-set-checker-executable
+ "ev" 'flycheck-verify-setup)
+#+END_SRC
+
+** [f]iles
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "f"   '(:ignore t :which-key "files")
+  "fc"  'spacemacs/copy-file
+  "fD"  'spacemacs/delete-current-buffer-file
+  "fe"  '(:ignore t :which-key "edit config")
+  "fei" 'me/find-user-init-file
+  "fee" 'me/find-early-init-file
+  "fed" 'me/find-user-org-file
+  "fet" 'me/find-user-org-tangle-file
+  "fer" 'me/reload-user-org-file
+  "fer" 'me/reload-user-org-file
+  "ff"  'spacemacs/helm-find-files
+  "fF"  'helm-find-files
+  "fg"  'rgrep
+  "fl"  'find-file-literally
+  ;;  "fE"  'spacemacs/sudo-edit
+  ;;  "fE"  'crux-reopen-as-root-mode
+  "fo"  'spacemacs/open-file-or-directory-in-external-app
+  "fr"  'helm-recentf
+  "fR"  'spacemacs/rename-current-buffer-file
+  "fS"  'evil-write-all
+  "fs"  'save-buffer
+  "fy"  'spacemacs/show-and-copy-buffer-filename)
+#+END_SRC
+
+** [h]elp
+
+#+BEGIN_SRC emacs-lisp
+(defun me/info-elisp-manual()
+  (interactive)
+  (info "Elisp")
+  "Display the Elisp manual in Info mode.")
+(me/leader-def
+  "h"   '(:ignore t :which-key "help")
+  "hd"  '(:ignore t :which-key "describe")
+  "hdb" 'describe-bindings
+  "hdc" 'describe-char
+  "hdf" 'describe-function
+  "hdk" 'describe-key-briefly
+  "hdK" 'describe-key
+  "hdm" 'describe-mode
+  "hdM" 'describe-minor-mode
+  "hdp" 'describe-package
+  "hdt" 'describe-theme
+  "hdv" 'describe-variable
+  "hdw" 'where-is
+  "hi"  '(:ignore t :which-key "info")
+  "hii" 'info
+  "hiI" 'helm-info
+  "hiE" 'helm-info-emacs
+  "hil" 'me/info-elisp-manual
+  "hiL" 'helm-info-elisp
+  "hn"  'view-emacs-news)
+#+END_SRC
+
+** [i]nsert
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "i"  '(:ignore t :which-key "insert")
+  "iJ" 'spacemacs/insert-line-below-no-indent
+  "iK" 'spacemacs/insert-line-above-no-indent
+  "ik" 'spacemacs/evil-insert-line-above
+  "ij" 'spacemacs/evil-insert-line-below)
+#+END_SRC
+
+** [j]ump, join, split
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "j"  '(:ignore t :which-key "jump, joint, split")
+  "jh" '(:ignore t :which-key "hl-todo")
+  "js" '(:ignore t :which-key "swoop"))
+#+END_SRC
+
+*** Highlight keywords
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  :keymaps 'hl-todo-mode-map
+  "jhk" 'hl-todo-previous
+  "jhj" 'hl-todo-next
+  "jhl" 'me/hl-todo-helm-occur
+  "jhL" 'me/hl-todo-helm-occur-strict
+  "jh." '(:ignore t :which-key "transient")
+  "jh." 'me//transient-hl-todo)
+#+END_SRC
+
+*** Navigation
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "j$"  'spacemacs/push-mark-and-goto-end-of-line
+  "j."  '(:ignore t :which-key "transient")
+  "j."  'me//transient-jump
+  "j0"  'spacemacs/push-mark-and-goto-beginning-of-line
+  "jI"  'helm-imenu-in-all-buffers
+  "ji"  'helm-imenu
+  "jj"  'evil-jump-forward
+  "jk"  'evil-jump-backward
+  "js"  '(:ignore t :which-key "swoop")
+  "jsa" 'helm-multi-swoop-all
+  "jsk" 'helm-swoop-back-to-last-point ; TODO: add swoop to better jumper
+  "jsm" 'helm-multi-swoop
+  "jss" 'helm-swoop)
+#+END_SRC
+
+** [l]ayers, workspaces
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "l"     '(:ignore t :which-key "layers, workspaces")
+  "lr"    '(:ignore t :which-key "rename workspace")
+  "lr"    'eyebrowse-rename-window-config
+  "ld"    '(:ignore t :which-key "delete  workspace")
+  "ld"    'eyebrowse-close-window-config
+  "ls"    '(:ignore t :which-key "switch  workspace")
+  "ls"    'eyebrowse-switch-to-window-config
+  "lj"    '(:ignore t :which-key "next workspace")
+  "lj"    'eyebrowse-next-window-config
+  "lk"    '(:ignore t :which-key "previous workspace")
+  "lk"    'eyebrowse-prev-window-config
+  "l TAB" '(:ignore t :which-key "last workspace")
+  "l TAB" 'eyebrowse-last-window-config
+  "l1"     '(:ignore t :which-key "goto 1")
+  "l1"    'eyebrowse-switch-to-window-config-1
+  "l2"     '(:ignore t :which-key "goto 2")
+  "l2"    'eyebrowse-switch-to-window-config-2
+  "l3"     '(:ignore t :which-key "goto 3")
+  "l3"    'eyebrowse-switch-to-window-config-3
+  "l4"     '(:ignore t :which-key "goto 4")
+  "l4"    'eyebrowse-switch-to-window-config-4
+  "l5"     '(:ignore t :which-key "goto 5")
+  "l5"    'eyebrowse-switch-to-window-config-5
+  "l6"     '(:ignore t :which-key "goto 6")
+  "l6"    'eyebrowse-switch-to-window-config-6
+  "l7"     '(:ignore t :which-key "goto 7")
+  "l7"    'eyebrowse-switch-to-window-config-7
+  "l8"     '(:ignore t :which-key "goto 8")
+  "l8"    'eyebrowse-switch-to-window-config-8
+  "l9"     '(:ignore t :which-key "goto 9")
+  "l9"    'eyebrowse-switch-to-window-config-9
+  "l0"     '(:ignore t :which-key "goto 0")
+  "l0"    'eyebrowse-switch-to-window-config-0)
+#+END_SRC
+
+** [n]arrow and widen
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "n"  '(:ignore t :which-key "narrow, widen")
+  "nr" 'narrow-to-region
+  "np" 'narrow-to-page
+  "nf" 'narrow-to-defun
+  "nw" 'widen)
+#+END_SRC
+
+** [p]rojects
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "p"  '(:ignore t :which-key "projects")
+  "p!" 'projectile-run-shell-command-in-root
+  "p%" 'projectile-replace-regexp
+  "p&" 'projectile-run-async-shell-command-in-root
+  "pD" 'projectile-dired
+  "pF" 'helm-projectile-find-file-dwim
+  "pG" 'projectile-regenerate-tags
+  "pI" 'projectile-invalidate-cache
+  "pR" 'projectile-replace
+  "pT" 'projectile-test-project
+  "pa" 'projectile-toggle-between-implementation-and-test
+  "pb" 'helm-projectile-switch-to-buffer
+  "pc" 'projectile-compile-project
+  "pd" 'helm-projectile-find-dir
+  "pf" 'helm-projectile-find-file
+  "pg" 'projectile-find-tag
+  "ps" 'helm-projectile-rg
+  "ph" 'helm-projectile
+  "pk" 'projectile-kill-buffers
+  "pl" 'spacemacs/helm-persp-switch-project
+  "pp" 'helm-projectile-switch-project
+  "pr" 'helm-projectile-recentf
+  "pv" 'projectile-vc)
+#+END_SRC
+
+** [q]uit
+
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "q"  '(:ignore t :which-key "quit1")
+  "qq" 'me/prompt-kill-emacs
+  "qQ" 'kill-emacs
+  "qz" 'me/prompt-kill-frame
+  "qZ" 'me/kill-frame)
+#+END_SRC
+
+** [r]egisters, ring, resume
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "r"  '(:ignore t :which-key "registers, ring, resume")
+  "rr" 'helm-resume
+  "ry" 'helm-show-kill-ring
+  "rm" 'helm-all-mark-rings)
+#+END_SRC
+
+** [s]earch, symbol
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "s"  '(:ignore t :which-key "search, symbol")
+  "sr" '(:ignore t :which-key "helm-rg")
+  "sr" 'helm-ag
+  "sg" 'helm-grep-do-git-grep)
+#+END_SRC
+
+** [t]oggle
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "t"  '(:ignore t :which-key "toggles")
+  "tC" 'me/transient-center-width
+  "tc" '(:ignore t :which-key "center-mode")
+  "tc" 'olivetti-mode
+  "tg" 'golden-ratio
+  "tG" 'golden-ratio-mode
+  "th" 'global-hl-todo-mode
+  "tw" 'me/toggle-which-key-delay
+  "tW" 'me/toggle-which-key-show-operator-state-maps)
+(me/leader-def
+  "T"  '(:ignore t :which-key "UI toggles/themes")
+  "Tc" 'column-enforce-mode
+  "Tn" 'me/toggle-display-line-numbers
+  "Tr" 'me/toggle-display-relative-line-numbers
+  "Ts" 'helm-themes
+  "Tk" 'me/theme-cycle-backward
+  "Tj" 'me/theme-cycle
+  "Tz" 'zone)
+#+END_SRC
+
+** [w]indows
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "w"      '(:ignore t :which-key "windows")
+  "w TAB"  'spacemacs/alternate-window
+  "w2"     'spacemacs/layout-double-columns
+  "w3"     'spacemacs/layout-triple-columns
+  "wb"     'spacemacs/switch-to-minibuffer-window
+  "wd"     'delete-window
+  ;;"wd"     'spacemacs/delete-window XXX
+  "wt"     'spacemacs/toggle-current-window-dedication
+  "wf"     'follow-mode
+  "wF"     'make-frame
+  "wH"     'evil-window-move-far-left
+  "wh"     'evil-window-left
+  "wJ"     'evil-window-move-very-bottom
+  "wj"     'evil-window-down
+  "wK"     'evil-window-move-very-top
+  "wk"     'evil-window-up
+  "wL"     'evil-window-move-far-right
+  "wl"     'evil-window-right
+  "wm"     'spacemacs/toggle-maximize-buffer
+  "wc"     'spacemacs/toggle-centered-buffer-mode
+  "wC"     'spacemacs/centered-buffer-mode-full-width
+  "wo"     'other-frame
+  "ws"     'split-window-below
+  "wS"     'split-window-below-and-focus
+  "wU"     'winner-redo
+  "wu"     'winner-undo
+  "wv"     'split-window-right
+  "wV"     'split-window-right-and-focus
+  "ww"     'other-window
+  "w="     'balance-windows
+  "w+"     'spacemacs/window-layout-toggle
+  "w_"     'spacemacs/maximize-horizontally)
+#+END_SRC
+
+** [x] transformations, words
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  :states '(normal visual)
+  "xz+" 'text-scale-increase
+  "xz-" 'text-scale-decrease
+  "x=" 'evil-numbers/inc-at-pt
+  "x+" 'evil-numbers/inc-at-pt
+  "x-" 'evil-numbers/dec-at-pt
+  "x." '(:ignore t :which-key "transient")
+  "x." 'me//transient-evil-numbers)
+#+END_SRC
+
+* TODO
+** Packages to check
+
+| =backup-walker= | https://github.com/lewang/backup-walker                    |
+| =helpful=       |                                                            |
+| =prettify=      |                                                            |
+| =selectrum=     |                                                            |
+| =marginalia=    |                                                            |
+| =evil-lispy=    |                                                            |
+|                 | https://github.com/abhishekchandratre/eyebrowse-projectile |
+|                 | https://github.com/cute-jumper/evil-embrace.el             |
+|                 | https://github.com/raxod502/straight.el                    |
+
+** WIP
+
+| =popper=     | https://github.com/karthink/popper |
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package popper
+  :bind (("C-`"   . popper-toggle-latest)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          "\\*scratch\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))
+
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'reverse)
+(setq uniquify-separator " * ")
+(setq uniquify-after-kill-buffer-p t)
+(setq uniquify-ignore-buffers-re "^\\*")
+
+#+END_SRC
+
+* TMP
+
+#+BEGIN_SRC emacs-lisp
+;; XXX: not working
+;(setq lsp-clients-clangd-library-directories
+;      (list "/usr")
+;             "/home_nfs/blucidol/src/ska/idg/build-hip-roc/include_toto")
+
+(add-to-list 'lsp-clients-clangd-args "--enable-config")
+#+END_SRC
