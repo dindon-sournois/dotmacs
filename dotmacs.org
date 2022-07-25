@@ -1095,8 +1095,10 @@ To disable loading of unused graphical components add this snippet of code into
 your =~/.Xressources= file:
 
 #+BEGIN_SRC conf
-! disable emacs loading of unused components emacs.menuBar: off emacs.toolBar:
-off emacs.verticalScrollBars: off
+! disable emacs loading of unused components
+emacs.menuBar: off
+emacs.toolBar: off
+emacs.verticalScrollBars: off
 #+END_SRC
 
 Change font to a powerline-patched one.
