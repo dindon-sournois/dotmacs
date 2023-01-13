@@ -61,7 +61,7 @@ multiplicative.
 | g@ | call function set with the 'operatorfunc' option  | nil                |
 #+END_QUOTE
 
-*** Motions
+*** WIP Motions
 **** Left-right motions
 
 #+BEGIN_QUOTE
@@ -477,10 +477,13 @@ Here are what I consider better defaults as per my own experience.
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
-(tool-bar-mode -1)                      ; Disable tool bar
-(menu-bar-mode -1)                      ; Disable menu bar
-(scroll-bar-mode -1)                    ; Disable scroll bar
 (global-hl-line-mode t)                 ; Highlight current line
+
+(if (display-graphic-p)
+    (progn
+      (tool-bar-mode -1)                      ; Disable tool bar
+      (menu-bar-mode -1)                      ; Disable menu bar
+      (scroll-bar-mode -1)))                    ; Disable scroll bar
 #+END_SRC
 
 Fix backspace when in terminal. You also need to configure your terminal to not
@@ -1055,37 +1058,6 @@ Function to toggle which-key menu on evil operators.
         (not which-key-show-operator-state-maps))
   (message (format "which-key-show-operator-state-maps is %s"
                    which-key-show-operator-state-maps)))
-#+END_SRC
-
-** Spacemacs XXX: remove me
-*** Core
-
-Install spacemacs dependencies.
-
-#+BEGIN_SRC emacs-lisp2
-(use-package validate)
-(use-package hydra)
-(use-package page-break-lines)
-#+END_SRC
-
-Add spacemacs files to path and load core functions.
-
-#+BEGIN_SRC emacs-lisp2
-(load (concat user-emacs-directory "lisp/spacemacs/core/core-versions.el"))
-(load (concat user-emacs-directory "lisp/spacemacs/core/core-load-paths.el"))
-(require 'core-spacemacs)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp2
-(require 'core-transient-state)
-(spacemacs|define-transient-state paste-mode
-        :title "Paste Transient State"
-        :doc "
- [_j_/_k_] down/up        [_Q_] quit twitter"
-        :bindings
-        ("?"          nil :exit t)
-        ("C-j"        evil-paste-pop-next)
-        ("C-k"        evil-paste-pop))
 #+END_SRC
 
 * Aesthetics
@@ -2688,7 +2660,7 @@ the major mode keybind. We choose =,,= for the prefix.
 |                 | https://github.com/cute-jumper/evil-embrace.el             |
 |                 | https://github.com/raxod502/straight.el                    |
 
-** WIP
+** WIP popper
 
 | =popper=     | https://github.com/karthink/popper |
 
@@ -2716,7 +2688,7 @@ the major mode keybind. We choose =,,= for the prefix.
 
 #+END_SRC
 
-* TMP
+** WIP lsp clangd
 
 #+BEGIN_SRC emacs-lisp
 ;; XXX: not working
@@ -2724,5 +2696,5 @@ the major mode keybind. We choose =,,= for the prefix.
 ;      (list "/usr")
 ;             "/home_nfs/blucidol/src/ska/idg/build-hip-roc/include_toto")
 
-(add-to-list 'lsp-clients-clangd-args "--enable-config")
+; XXX: 26.3 (add-to-list 'lsp-clients-clangd-args "--enable-config")
 #+END_SRC
