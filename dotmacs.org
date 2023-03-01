@@ -29,146 +29,6 @@ Backup your init files if necessary and copy this current file (=dotmacs.org=),
 
 Next time, simply reload changes with =<SPC> f e r=.
 
-** Very basic vim doc
-*** Command syntax
-
-| =vim= | http://vimdoc.sourceforge.net/htmldoc/motion.html |
-
-A vim command (emulated with =evil=) usualy looks like this:
-=<COUNT> <OPERATOR> <COUNT> <MOTION>=
-
-Please note that most of the arguments are optionnal, you can use some
-=<OPERATOR>= without =<MOTION>= and vise-versa. The =<COUNT>= are
-multiplicative.
-
-*** Operators
-
-#+BEGIN_QUOTE
-| c  | change                                            | evil-change        |
-| d  | delete                                            | evil-delete        |
-| y  | yank into register (does not change the text)     | evil-yank          |
-| ~  | swap case (only if 'tildeop' is set)              | evil-invert-char   |
-| g~ | swap case                                         | evil-invert-case   |
-| gu | make lowercase                                    | evil-downcase      |
-| gU | make uppercase                                    | evil-upcase        |
-| !  | filter through an external program                | evil-shell-command |
-| =  | filter through 'equalprg' or C-indenting if empty | evil-indent        |
-| gq | text formatting                                   | evil-fill-and-move |
-| g? | ROT13 encoding                                    | evil-rot13         |
-| >  | shift right                                       | evil-shift-right   |
-| <  | shift left                                        | evil-shift-left    |
-| zf | define a fold                                     | nil                |
-| g@ | call function set with the 'operatorfunc' option  | nil                |
-#+END_QUOTE
-
-*** WIP Motions
-**** Left-right motions
-
-#+BEGIN_QUOTE
-| h                     |   |   |
-| l                     |   |   |
-| 0                     |   |   |
-| ^                     |   |   |
-| $                     |   |   |
-| g_                    |   |   |
-| g0                    |   |   |
-| g^                    |   |   |
-| gm                    |   |   |
-| g$                    |   |   |
-| \vert                 |   |   |
-| f{char}               |   |   |
-| F{char}               |   |   |
-| t{char}               |   |   |
-| T{char}               |   |   |
-| ;                     |   |   |
-| ,                     |   |   |
-#+END_QUOTE
-
-**** Up-down motions
-
-#+BEGIN_QUOTE
-| k                     |   |   |
-| j                     |   |   |
-| gk                    |   |   |
-| gj                    |   |   |
-| -                     |   |   |
-| +                     |   |   |
-| _                     |   |   |
-| G                     |   |   |
-| gg                    |   |   |
-| :[range]              |   |   |
-| {count}%              |   |   |
-| :[range]go            |   |   |
-| [count]go             |   |   |
-#+END_QUOTE
-
-**** Word motions
-
-#+BEGIN_QUOTE
-| w                     |   |   |
-| W                     |   |   |
-| e                     |   |   |
-| E                     |   |   |
-| b                     |   |   |
-| B                     |   |   |
-| ge                    |   |   |
-| gE                    |   |   |
-#+END_QUOTE
-
-**** Text-object motions
-
-#+BEGIN_QUOTE
-| (                     |   |   |
-| )                     |   |   |
-| {                     |   |   |
-| }                     |   |   |
-| ]]                    |   |   |
-| ][                    |   |   |
-| [[                    |   |   |
-| []                    |   |   |
-#+END_QUOTE
-
-**** Text-object selection motions
-
-#+BEGIN_QUOTE
-| aw                    |   |   |
-| iw                    |   |   |
-| aW                    |   |   |
-| iW                    |   |   |
-| as                    |   |   |
-| is                    |   |   |
-| ap                    |   |   |
-| ip                    |   |   |
-| a]                    |   |   |
-| a[                    |   |   |
-| i]                    |   |   |
-| i[                    |   |   |
-| a)                    |   |   |
-| a(                    |   |   |
-| ab                    |   |   |
-| i)                    |   |   |
-| i(                    |   |   |
-| ib                    |   |   |
-| a>                    |   |   |
-| a<                    |   |   |
-| i>                    |   |   |
-| i<                    |   |   |
-| at                    |   |   |
-| it                    |   |   |
-| a}                    |   |   |
-| a{                    |   |   |
-| aB                    |   |   |
-| i}                    |   |   |
-| i{                    |   |   |
-| iB                    |   |   |
-| a"                    |   |   |
-| a'                    |   |   |
-| a`                    |   |   |
-| i"                    |   |   |
-| i'                    |   |   |
-| i`                    |   |   |
-#+END_QUOTE
-
 ** Naming conventions
 
 From Spacemacs:
@@ -353,41 +213,22 @@ Removes the automatic guessing of the initial value based on thing at point. "
 
 ** Format
 
-TODO: refactorise this shit
-
 #+BEGIN_SRC emacs-lisp
-(defun me/sort-lines (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case t)
-  (sort-lines nil beg end))
-(defun me/sort-lines-case (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case nil)
-  (sort-lines nil beg end))
-(defun me/sort-lines-reverse (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case t)
-  (sort-lines t beg end))
-(defun me/sort-lines-case-reverse (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case nil)
-  (sort-lines t beg end))
-(defun me/sort-paragraphs (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case t)
-  (sort-paragraphs nil beg end))
-(defun me/sort-paragraphs-case (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case nil)
-  (sort-paragraphs nil beg end))
-(defun me/sort-paragraphs-reverse (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case t)
-  (sort-paragraphs t beg end))
-(defun me/sort-paragraphs-case-reverse (beg end)
-  (interactive "r")
-  (setq-local sort-fold-case nil)
-  (sort-paragraphs t beg end))
+(defun me/sort-lines (beg end &optional reverse fold-case)
+  "Sort lines in region between BEG and END.
+With prefix arg, sort in reverse. With two prefix args,
+ignore case."
+  (interactive "r\nP")
+  (setq-local sort-fold-case fold-case)
+  (sort-lines reverse beg end))
+
+(defun me/sort-paragraphs (beg end &optional reverse fold-case)
+  "Sort paragraphs in region between BEG and END.
+With prefix arg, sort in reverse. With two prefix args,
+ignore case."
+  (interactive "r\nP")
+  (setq-local sort-fold-case fold-case)
+  (sort-paragraphs reverse beg end))
 #+END_SRC
 
 ** Quit
@@ -473,10 +314,6 @@ Here are what I consider better defaults as per my own experience.
 ;;(mouse-avoidance-mode 'exile)           ; Avoid collision of mouse with point
 ;;(put 'downcase-region 'disabled nil)    ; Enable downcase-region
 ;;(put 'upcase-region 'disabled nil)      ; Enable upcase-region
-(set-default-coding-systems 'utf-8)     ; Default to utf-8 encoding
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(prefer-coding-system 'utf-8)
 (global-hl-line-mode t)                 ; Highlight current line
 
 (if (display-graphic-p)
@@ -598,18 +435,24 @@ Native compiled files (=.elc=) are also stored in =.cache= but it is done in
 Setup offline repositories.
 
 #+BEGIN_SRC emacs-lisp
+(setq url-proxy-services
+  '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+    ("http" . "spartan0:33000")
+    ("https" . "spartan0:33000")))
+
 (require 'package)
 (package-initialize)
 (setq package-archives nil)
 (me/add-to-list-multi
  'package-archives
- (list '("gnu_local"   . "~/emacs-pkgs/gnu")
-       '("melpa_local" . "~/emacs-pkgs/melpa")
-       ; '("melpa"       . "https://melpa.org/packages/")
-       ; '("gnu"         . "https://elpa.gnu.org/packages/")
-       ; '("org"         . "https://orgmode.org/elpa/")
-       ; '("nongnu"      . "https://elpa.nongnu.org/nongnu/")
-      )
+ (list
+  ;; '("gnu_local"   . "~/emacs-pkgs/gnu")
+  ;; '("melpa_local" . "~/emacs-pkgs/melpa")
+  '("melpa"       . "https://melpa.org/packages/")
+  '("gnu"         . "https://elpa.gnu.org/packages/")
+  '("org"         . "https://orgmode.org/elpa/")
+  '("nongnu"      . "https://elpa.nongnu.org/nongnu/")
+  )
  t) ; from highest priority to lowest (`append' flag)
 #+END_SRC
 
@@ -620,7 +463,7 @@ Install the =use-package= dependency.
   (package-refresh-contents)
   (package-install 'use-package))
 (setq use-package-always-ensure t
-      use-packagealways-defer t)
+      use-package-always-defer nil)
 #+END_SRC
 
 Loading additionnal elisp files.
@@ -918,7 +761,6 @@ Completion and candidates display framework.
             '(helm-flex)
           '(flex)))
   :config
-  (require 'helm-config)
   (define-key global-map [remap find-file] 'helm-find-files)
   (define-key global-map [remap occur] 'helm-occur)
   (define-key global-map [remap list-buffers] 'helm-buffers-list)
@@ -1063,8 +905,8 @@ Function to toggle which-key menu on evil operators.
 * Aesthetics
 ** Frame
 
-To disable loading of unused graphical components add this snippet of code into
-your =~/.Xressources= file:
+To disable loading of unused graphical components early, add this snippet of
+code into your =~/.Xressources= file:
 
 #+BEGIN_SRC conf
 ! disable emacs loading of unused components
@@ -1073,9 +915,15 @@ emacs.toolBar: off
 emacs.verticalScrollBars: off
 #+END_SRC
 
-Change font to a powerline-patched one.
+You might still need this for an emacs without x-toolkit:
 
 #+BEGIN_SRC emacs-lisp
+(menu-bar-mode -1)
+#+END_SRC
+
+Change font to a powerline-patched one.
+
+,#+BEGIN_SRC emacs-lisp
 ;; (set-default-font "Dejavu Sans Mono for Powerline")
 (set-face-attribute 'default nil :height 100) ;; format: 1/X pt
 #+END_SRC
@@ -1139,7 +987,7 @@ Initialize known themes and provide a helper to cycle through known themes.
 
 #+BEGIN_SRC emacs-lisp
 (use-package org-bullets :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 0))))
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
 
 ** Modeline
@@ -1185,7 +1033,10 @@ Install spacemacs's powerline.
   (diminish 'evil-escape-mode "jk")
   (diminish 'helm-mode "Hlm")
   (diminish 'which-key-mode "WhKy")
-  (diminish 'flycheck-mode "FlChk"))
+  (diminish 'flycheck-mode "FlChk")
+  :init
+  (setq powerline-default-separator 'wave))
+  (spaceline-compile)
 #+END_SRC
 
 ** Colors
@@ -1401,8 +1252,8 @@ A tree layout file explorer for Emacs.
 ;; (use-package treemacs-icons-dired
 ;;   :hook (dired-mode . treemacs-icons-dired-enable-once))
 
-(use-package treemacs-magit
-  :after (treemacs magit))
+;; (use-package treemacs-magit
+  ;; :after (treemacs magit))
 #+END_SRC
 
 ** Git and other VC
@@ -1412,32 +1263,22 @@ A tree layout file explorer for Emacs.
 Complete text-based user interface to git.
 
 #+BEGIN_SRC emacs-lisp
-(use-package magit)
+;; (use-package magit)
 #+END_SRC
 
 # TODO
 
 #+BEGIN_SRC emacs-lisp2
-(use-package git-gutter-fringe
-  :preface
-  (defun cunene/git-gutter-enable ()
-    (when-let* ((buffer (buffer-file-name))
-                (backend (vc-backend buffer)))
-      (require 'git-gutter)
-      (require 'git-gutter-fringe)
-      (git-gutter-mode 1)))
-  :hook
-  (after-change-major-mode . cunene/git-gutter-enable)
-  :config
-  (define-fringe-bitmap 'git-gutter-fr:added [255] nil nil '(center t))
-  (define-fringe-bitmap 'git-gutter-fr:deleted [255 255 255 255] nil nil 'bottom)
-  (define-fringe-bitmap 'git-gutter-fr:modified [255] nil nil '(center t)))
+;; (use-package git-messenger
+;;   :bind ("C-x G" . git-messenger:popup-message)
+;;   :config
+;;   (setq git-messenger:show-detail t
+;;         git-messenger:use-magit-popup t))
 
-(use-package git-messenger
-  :bind ("C-x G" . git-messenger:popup-message)
-  :config
-  (setq git-messenger:show-detail t
-        git-messenger:use-magit-popup t))
+(use-package git-gutter
+   :config
+   (global-git-gutter-mode t)
+   (git-gutter:linum-setup))
 #+END_SRC
 
 ** Highlight keywords
@@ -1569,6 +1410,7 @@ resides) or make a symbolic link.
 (use-package lsp-mode
   :init
   (setq-default lsp-keymap-prefix "C-c l")
+  (setq lsp-enable-imenu nil) ; allow jumping to functions not catched by #ifdef
   :hook ((f90-mode . lsp)
          (fortran-mode . lsp)
          (c-mode . lsp)
@@ -1590,8 +1432,11 @@ queries information on the repository, which requires a connection.
 (use-package projectile
   :init
   (setq projectile-sort-order 'recentf
-        projectile-generic-command "rg --files"
-        projectile-svn-command "rg --files"
+        ;; projectile-generic-command "rg --files"
+        projectile-generic-command "git ls-files -zco --exclude-standard"
+        ;; projectile-svn-command "rg --files"
+        projectile-svn-command "git ls-files -zco --exclude-standard"
+        projectile-git-command "git ls-files -zco --exclude-standard"
         projectile-mode-line-prefix " Proj"
         projectile-enable-caching t
         projectile-cache-file (me/cache-concat "projectile.cache")
@@ -1637,6 +1482,67 @@ Never lose undo history with this package.
   (setq undo-tree-visualizer-diff t
         undo-tree-visualizer-timestamps t)
   (global-undo-tree-mode 1))
+#+END_SRC
+
+** vimdiff but for emacs
+
+Easily compare and alter files side-by-side.
+
+#+BEGIN_SRC emacs-lisp
+(use-package vdiff
+  :config
+  ;; Whether to lock scrolling by default when starting vdiff
+  (setq vdiff-lock-scrolling t)
+
+  ;; diff program/algorithm to use. Allows choice of diff or git diff along with
+  ;; the various algorithms provided by these commands. See
+  ;; `vdiff-diff-algorithms' for the associated command line arguments.
+  (setq vdiff-diff-algorithm 'diff)
+
+  ;; diff3 command to use. Specify as a list where the car is the command to use
+  ;; and the remaining elements are the arguments to the command.
+  (setq vdiff-diff3-command '("diff3"))
+
+  ;; Don't use folding in vdiff buffers if non-nil.
+  (setq vdiff-disable-folding nil)
+
+  ;; Unchanged lines to leave unfolded around a fold
+  (setq vdiff-fold-padding 6)
+
+  ;; Minimum number of lines to fold
+  (setq vdiff-min-fold-size 4)
+
+  ;; If non-nil, allow closing new folds around point after updates.
+  (setq vdiff-may-close-fold-on-point t)
+
+  ;; Function that returns the string printed for a closed fold. The arguments
+  ;; passed are the number of lines folded, the text on the first line, and the
+  ;; width of the buffer.
+  (setq vdiff-fold-string-function 'vdiff-fold-string-default)
+
+  ;; Default syntax table class code to use for identifying "words" in
+  ;; `vdiff-refine-this-change'. Some useful options are
+  ;;
+  ;; "w"   (default) words
+  ;; "w_"  symbols (words plus symbol constituents)
+  ;;
+  ;; For more information see
+  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html
+  (setq vdiff-default-refinement-syntax-code "w")
+
+  ;; If non-nil, automatically refine all hunks.
+  (setq vdiff-auto-refine nil)
+
+  ;; How to represent subtractions (i.e., deleted lines). The
+  ;; default is full which means add the same number of (fake) lines
+  ;; as those that were removed. The choice single means add only one
+  ;; fake line. The choice fringe means don't add lines but do
+  ;; indicate the subtraction location in the fringe.
+  (setq vdiff-subtraction-style 'full)
+
+  ;; Character to use for filling subtraction lines. See also
+  ;; `vdiff-subtraction-style'.
+  (setq vdiff-subtraction-fill-char ?-))
 #+END_SRC
 
 ** Window auo-resize
@@ -1725,6 +1631,14 @@ Python.
                   (make-directory dir t))))))
 #+END_SRC
 
+** Reduce auto-save
+
+This can be annoying on system with slow nfs.
+
+#+BEGIN_SRC emacs-lisp
+;; (auto-save-mode -1)
+(setq auto-save-interval 600)
+#+END_SRC
 ** Files and modes association
 
 #+BEGIN_SRC emacs-lisp
@@ -2250,15 +2164,23 @@ the major mode keybind. We choose =,,= for the prefix.
   "=s"   '(:ignore t :which-key "sort")
   "=S"   'spacemacs/split-and-new-line
   "=sl"  '(:ignore t :which-key "sort lines")
-  "=slc" 'me/sort-lines-case
-  "=slC" 'me/sort-lines-case-reverse
-  "=sll" 'me/sort-lines
-  "=slL" 'me/sort-lines-reverse
+  "=sll"  '(:ignore t :which-key "sort lines")
+  "=sll" '(lambda()(interactive)(me/sort-lines (region-beginning) (region-end) nil nil))
+  "=slL"  '(:ignore t :which-key "sort lines (reversed)")
+  "=slL" '(lambda()(interactive)(me/sort-lines (region-beginning) (region-end) t nil))
+  "=slc"  '(:ignore t :which-key "sort lines (ignore case)")
+  "=slc" '(lambda()(interactive)(me/sort-lines (region-beginning) (region-end) nil t))
+  "=slC"  '(:ignore t :which-key "sort lines (reversed + ignore case)")
+  "=slC" '(lambda()(interactive)(me/sort-lines (region-beginning) (region-end) t t))
   "=sp"  '(:ignore t :which-key "sort paragraphs")
-  "=spc" 'me/sort-paragraphs-case
-  "=spC" 'me/sort-paragraphs-case-reverse
-  "=spp" 'me/sort-paragraphs
-  "=spP" 'me/sort-paragraphs-reverse)
+  "=spp"  '(:ignore t :which-key "sort paragraph")
+  "=spp" '(lambda()(interactive)(me/sort-paragraphs (region-beginning) (region-end) nil nil))
+  "=spP"  '(:ignore t :which-key "sort paragraph (reversed)")
+  "=spP" '(lambda()(interactive)(me/sort-paragraphs (region-beginning) (region-end) t nil))
+  "=spc"  '(:ignore t :which-key "sort paragraph (ignore case)")
+  "=spc" '(lambda()(interactive)(me/sort-paragraphs (region-beginning) (region-end) nil t))
+  "=spC"  '(:ignore t :which-key "sort paragraph (reversed + ignore case)")
+  "=spC" '(lambda()(interactive)(me/sort-paragraphs (region-beginning) (region-end) t t)))
 #+END_SRC
 
 ** [a]applications
@@ -2290,6 +2212,7 @@ the major mode keybind. We choose =,,= for the prefix.
   "bo" '(lambda ()(interactive) (crux-open-with t))
   "bs" 'me/switch-to-scratch
   "bm" 'me/switch-to-messages
+  "br" 'revert-buffer
   "bt" 'crux-transpose-windows
   "bO" 'crux-open-with)
 #+END_SRC
@@ -2307,6 +2230,22 @@ the major mode keybind. We choose =,,= for the prefix.
   "cv"  'evilnc-toggle-invert-comment-line-by-line)
 ;; "c."  'evilnc-copy-and-comment-operator
 ;; "c\\" 'evilnc-comment-operator
+#+END_SRC
+
+** [d]iff
+
+#+BEGIN_SRC emacs-lisp
+(me/leader-def
+  "d"  '(:ignore t :which-key "diff")
+  "d3"  '(:ignore t :which-key "triple")
+  :states '(normal)
+  "db"  'vdiff-buffers
+  "df"  'vdiff-files
+  "d3b" 'vdiff-buffers3
+  "d3f" 'vdiff-files3
+  "dc"  'vdiff-current-file
+  "dm"  'vdiff-merge-conflict)
+(evil-define-key 'normal vdiff-mode-map "," vdiff-mode-prefix-map)
 #+END_SRC
 
 ** [e]rrors
@@ -2544,11 +2483,11 @@ the major mode keybind. We choose =,,= for the prefix.
 
 #+BEGIN_SRC emacs-lisp
 (me/leader-def
-  "q"  '(:ignore t :which-key "quit1")
+  "q"  '(:ignore t :which-key "quit")
   "qq" 'me/prompt-kill-emacs
   "qQ" 'kill-emacs
-  "qz" 'me/prompt-kill-frame
-  "qZ" 'me/kill-frame)
+  "qf" 'me/prompt-kill-frame
+  "qF" 'me/kill-frame)
 #+END_SRC
 
 ** [r]egisters, ring, resume
@@ -2647,6 +2586,147 @@ the major mode keybind. We choose =,,= for the prefix.
   "x." 'me//transient-evil-numbers)
 #+END_SRC
 
+* Doc
+** Very basic vim doc
+*** Command syntax
+
+| =vim= | http://vimdoc.sourceforge.net/htmldoc/motion.html |
+
+A vim command (emulated with =evil=) usualy looks like this:
+=<COUNT> <OPERATOR> <COUNT> <MOTION>=
+
+Please note that most of the arguments are optionnal, you can use some
+=<OPERATOR>= without =<MOTION>= and vise-versa. The =<COUNT>= are
+multiplicative.
+
+*** Operators
+
+#+BEGIN_QUOTE
+| c  | change                                            | evil-change        |
+| d  | delete                                            | evil-delete        |
+| y  | yank into register (does not change the text)     | evil-yank          |
+| ~  | swap case (only if 'tildeop' is set)              | evil-invert-char   |
+| g~ | swap case                                         | evil-invert-case   |
+| gu | make lowercase                                    | evil-downcase      |
+| gU | make uppercase                                    | evil-upcase        |
+| !  | filter through an external program                | evil-shell-command |
+| =  | filter through 'equalprg' or C-indenting if empty | evil-indent        |
+| gq | text formatting                                   | evil-fill-and-move |
+| g? | ROT13 encoding                                    | evil-rot13         |
+| >  | shift right                                       | evil-shift-right   |
+| <  | shift left                                        | evil-shift-left    |
+| zf | define a fold                                     | nil                |
+| g@ | call function set with the 'operatorfunc' option  | nil                |
+#+END_QUOTE
+
+*** WIP Motions
+**** Left-right motions
+
+#+BEGIN_QUOTE
+| h                     |   |   |
+| l                     |   |   |
+| 0                     |   |   |
+| ^                     |   |   |
+| $                     |   |   |
+| g_                    |   |   |
+| g0                    |   |   |
+| g^                    |   |   |
+| gm                    |   |   |
+| g$                    |   |   |
+| \vert                 |   |   |
+| f{char}               |   |   |
+| F{char}               |   |   |
+| t{char}               |   |   |
+| T{char}               |   |   |
+| ;                     |   |   |
+| ,                     |   |   |
+#+END_QUOTE
+
+**** Up-down motions
+
+#+BEGIN_QUOTE
+| k                     |   |   |
+| j                     |   |   |
+| gk                    |   |   |
+| gj                    |   |   |
+| -                     |   |   |
+| +                     |   |   |
+| _                     |   |   |
+| G                     |   |   |
+| gg                    |   |   |
+| :[range]              |   |   |
+| {count}%              |   |   |
+| :[range]go            |   |   |
+| [count]go             |   |   |
+#+END_QUOTE
+
+**** Word motions
+
+#+BEGIN_QUOTE
+| w                     |   |   |
+| W                     |   |   |
+| e                     |   |   |
+| E                     |   |   |
+| b                     |   |   |
+| B                     |   |   |
+| ge                    |   |   |
+| gE                    |   |   |
+#+END_QUOTE
+
+**** Text-object motions
+
+#+BEGIN_QUOTE
+| (                     |   |   |
+| )                     |   |   |
+| {                     |   |   |
+| }                     |   |   |
+| ]]                    |   |   |
+| ][                    |   |   |
+| [[                    |   |   |
+| []                    |   |   |
+#+END_QUOTE
+
+**** Text-object selection motions
+
+#+BEGIN_QUOTE
+| aw                    |   |   |
+| iw                    |   |   |
+| aW                    |   |   |
+| iW                    |   |   |
+| as                    |   |   |
+| is                    |   |   |
+| ap                    |   |   |
+| ip                    |   |   |
+| a]                    |   |   |
+| a[                    |   |   |
+| i]                    |   |   |
+| i[                    |   |   |
+| a)                    |   |   |
+| a(                    |   |   |
+| ab                    |   |   |
+| i)                    |   |   |
+| i(                    |   |   |
+| ib                    |   |   |
+| a>                    |   |   |
+| a<                    |   |   |
+| i>                    |   |   |
+| i<                    |   |   |
+| at                    |   |   |
+| it                    |   |   |
+| a}                    |   |   |
+| a{                    |   |   |
+| aB                    |   |   |
+| i}                    |   |   |
+| i{                    |   |   |
+| iB                    |   |   |
+| a"                    |   |   |
+| a'                    |   |   |
+| a`                    |   |   |
+| i"                    |   |   |
+| i'                    |   |   |
+| i`                    |   |   |
+#+END_QUOTE
+
 * TODO
 ** Packages to check
 
@@ -2698,3 +2778,4 @@ the major mode keybind. We choose =,,= for the prefix.
 
 ; XXX: 26.3 (add-to-list 'lsp-clients-clangd-args "--enable-config")
 #+END_SRC
+

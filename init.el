@@ -1,5 +1,14 @@
 ;;; init.el -*- lexical-binding: t; -*-
 
+;; UTF-8 nonsense
+; not required?
+(set-language-environment "UTF-8")
+(set-default-coding-systems 'utf-8)
+(prefer-coding-system 'utf-8)
+; required
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
 ;; Default init and cache location
 (defconst me-config-file
   (concat user-emacs-directory "dotmacs.el")

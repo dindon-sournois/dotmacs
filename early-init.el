@@ -27,9 +27,5 @@
                             inhibit-message nil)
               (redisplay))))
 
-;; Contrary to what many Emacs users have in their configs, you don't need
-;; more than this to make UTF-8 the default coding system:
-(set-language-environment "UTF-8")
-
 ;; set-language-enviornment sets default-input-method, which is unwanted
 (setq default-input-method nil)
