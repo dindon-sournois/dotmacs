@@ -1432,11 +1432,11 @@ queries information on the repository, which requires a connection.
 (use-package projectile
   :init
   (setq projectile-sort-order 'recentf
-        ;; projectile-generic-command "rg --files"
-        projectile-generic-command "git ls-files -zco --exclude-standard"
-        ;; projectile-svn-command "rg --files"
-        projectile-svn-command "git ls-files -zco --exclude-standard"
-        projectile-git-command "git ls-files -zco --exclude-standard"
+        projectile-indexing-method 'hybrid
+        projectile-generic-command "rg --files"
+        projectile-svn-command "rg --files"
+        projectile-git-command "git ls-files -zc --exclude-standard"
+        projectile-use-git-grep t
         projectile-mode-line-prefix " Proj"
         projectile-enable-caching t
         projectile-cache-file (me/cache-concat "projectile.cache")
@@ -2469,7 +2469,9 @@ the major mode keybind. We choose =,,= for the prefix.
   "pd" 'helm-projectile-find-dir
   "pf" 'helm-projectile-find-file
   "pg" 'projectile-find-tag
-  "ps" 'helm-projectile-rg
+  "po" 'projectile-find-other-file
+  "pO" 'projectile-find-other-file-other-window
+  "ps" 'helm-projectile-grep
   "ph" 'helm-projectile
   "pk" 'projectile-kill-buffers
   "pl" 'spacemacs/helm-persp-switch-project
