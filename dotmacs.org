@@ -1268,7 +1268,7 @@ Complete text-based user interface to git.
 
 # TODO
 
-#+BEGIN_SRC emacs-lisp2
+#+BEGIN_SRC emacs-lisp
 ;; (use-package git-messenger
 ;;   :bind ("C-x G" . git-messenger:popup-message)
 ;;   :config
@@ -1431,7 +1431,7 @@ queries information on the repository, which requires a connection.
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
   :init
-  (setq projectile-sort-order 'recentf
+  (setq projectile-sort-order 'default
         projectile-indexing-method 'hybrid
         projectile-generic-command "rg --files"
         projectile-svn-command "rg --files"
@@ -2017,10 +2017,17 @@ tool for Emacs.
   "jv" 'find-variable
   "jV" 'find-variable-other-window
   "t"  '(:ignore t :which-key "tangle")
-  "tt"  'org-babel-tangle
-  "tf"  'org-babel-tangle-file
-  "td"  'org-babel-detangle
-  "e"  'org-export-dispatch)
+  "tt" 'org-babel-tangle
+  "tf" 'org-babel-tangle-file
+  "td" 'org-babel-detangle
+  "e"  'org-export-dispatch
+  "s"  '(:ignore t :which-key "spreadsheet")
+  "si" 'org-table-field-info
+  "st" 'org-table-toggle-coordinate-overlays
+  "sec" 'org-table-eval-formula
+  "sef" 'org-table-eval-formula
+  "see" 'org-edit-special
+  )
 #+END_SRC
 
 Define keybind for =org-edit-special= buffers. It's a bit tricky here since we
