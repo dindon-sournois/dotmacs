@@ -753,8 +753,10 @@ Completion and candidates display framework.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :init
-  ;; completion is done by emacs using `flex' engine when available
+  ;; Completion is done by emacs using `flex' engine when available
   ;; (>= emacs 27) or fall back to `helm-flex'.
+  ;; If a space in entered, multi-patterns completion is used. This is
+  ;; especially useful when you're not sure of the words order of your match.
   (setq-default helm-completion-style 'emacs)
   (setq completion-styles
         (if (version< emacs-version "27.0")
@@ -1742,6 +1744,15 @@ TODO: figure out why it needs to be language specific.
                (kill-buffer session)))))
 #+END_SRC
 
+Add snippets to expand `< s TAB` to a source block.
+
+#+begin_src emacs-lisp
+(require 'org-tempo)
+#+end_src
+
+See all available snippets in the `org-structure-template-alist` and
+`org-tempo-keywords-alist` variables.
+
 ** Remote file editing
 *** Tramp
 
@@ -1864,14 +1875,17 @@ tool for Emacs.
   ;;(org-adapt-indentation nil)
   (org-confirm-babel-evaluate t)
   ;;(org-cycle-separator-lines 0)
-  ;;(org-descriptive-links nil) ; TODO: toggle
+  ;;(org-descriptive-links t) ; TODO: toggle
   (org-edit-src-content-indentation 0)
   (org-edit-src-persistent-message t)
   (org-fontify-done-headline t)
   (org-fontify-quote-and-verse-blocks t)
   (org-fontify-whole-heading-line t)
   (org-return-follows-link t)
-  ;;(org-src-tab-acts-natively t)
+  ;; HACK: disable this to fix calling `completion-at-point` when using
+  ;; `evil-org-open-below/above` with `o/O` in source blocks.
+  ;; see https://github.com/syl20bnr/spacemacs/issues/13465
+  (org-src-tab-acts-natively nil)
   (org-src-window-setup 'current-window))
 
 ;;(org-startup-truncated nil)
