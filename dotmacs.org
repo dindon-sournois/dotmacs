@@ -1411,7 +1411,21 @@ resides) or make a symbolic link.
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :init
-  (setq-default lsp-keymap-prefix "C-c l")
+  (setq-default
+   ;; lsp-clangd-version "15.0.6"
+   lsp-keymap-prefix "C-c l"
+   lsp-clients-clangd-args
+   ;; (append lsp-clients-clangd-args
+   '(
+     "--header-insertion-decorators=0"
+     "--limit-references=0"
+     "--limit-results=0"
+     "--rename-file-limit=0"
+     "--j=4"
+     "--background-index"
+     ;; "-log=error"
+     ))
+
   (setq lsp-enable-imenu nil) ; allow jumping to functions not catched by #ifdef
   :hook ((f90-mode . lsp)
          (fortran-mode . lsp)
