@@ -291,7 +291,7 @@ Here are what I consider better defaults as per my own experience.
  inhibit-startup-screen t               ; Disable start-up screen
  initial-scratch-message ""             ; Empty the initial *scratch* buffer
  mouse-yank-at-point t                  ; Yank at point rather than pointer
- gc-cons-threshold (* 8 1024 1024)      ; We're not using Game Boys anymore
+ gc-cons-threshold (* 100 1000 1000)      ; We're not using Game Boys anymore, recommended value by lsp-mode
  read-process-output-max (* 1024 1024)  ; Increase read size per process
  ;;recenter-positions '(5 top bottom)     ; Set re-centering positions
  ;;scroll-conservatively 101              ; Avoid recentering when scrolling far
@@ -1365,13 +1365,11 @@ for Emacs that can be used to easily jump back to previous locations.
 
 (advice-add 'find-function :around #'me//evil-set-jump)
 (advice-add 'find-variable :around #'me//evil-set-jump)
-;; (advice-add 'lsp-find-references :around #'me//evil-set-jump)
-;; (advice-add 'lsp-find-definition :around #'me//evil-set-jump)
-;; (advice-add 'lsp-find-declaration :around #'me//evil-set-jump)
-;; (advice-add 'lsp-find-implementation :around #'me//evil-set-jump)
+(advice-add 'lsp-find-references :around #'me//evil-set-jump)
+(advice-add 'lsp-find-definition :around #'me//evil-set-jump)
+(advice-add 'lsp-find-declaration :around #'me//evil-set-jump)
+(advice-add 'lsp-find-implementation :around #'me//evil-set-jump)
 ;; (advice-add 'lsp-find-type-definitio:around #'me//evil-set-jump)
-;; (advice-add 'lsp-find-locations :around #'me//evil-set-jump)
-;; (advice-add 'lsp-show-xref :around #'me//evil-set-jump)
 ;; (advice-add 'xref-find-apropos :around #'me//evil-set-jump)
 
 (defun me//transient-jump()(interactive))
@@ -1408,12 +1406,15 @@ the compilation folder.
 Then simply copy it to your project root folder (where .git, .svn or .projectile
 resides) or make a symbolic link.
 
+
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :init
   (setq-default
    ;; lsp-clangd-version "15.0.6"
    lsp-keymap-prefix "C-c l"
+   ;; should improve performance if LSP_USE_PLISTS is set to true before lsp is built
+   lsp-use-plists t
    lsp-clients-clangd-args
    ;; (append lsp-clients-clangd-args
    '(
