@@ -418,6 +418,8 @@ Change other temporary files locations.
 (me|set-in-cache-dir transient-history-file "transient/history.el")
 (me|set-in-cache-dir transient-levels-file "transient/levels.el")
 (me|set-in-cache-dir transient-values-file "transient/values.el")
+(setq undo-tree-history-directory-alist
+      `(("." . ,(me/cache-concat "undos"))))
 #+END_SRC
 
 Native compiled files (=.elc=) are also stored in =.cache= but it is done in
@@ -920,7 +922,7 @@ emacs.verticalScrollBars: off
 You might still need this for an emacs without x-toolkit:
 
 #+BEGIN_SRC emacs-lisp
-(menu-bar-mode -1)
+(menu-bar-mode 1)
 #+END_SRC
 
 Change font to a powerline-patched one.
