@@ -1281,7 +1281,7 @@ Complete text-based user interface to git.
 
 (use-package git-gutter
    :config
-   (global-git-gutter-mode t)
+   (global-git-gutter-mode nil)
    (git-gutter:linum-setup))
 #+END_SRC
 
@@ -1607,7 +1607,7 @@ lines.
   (whitespace-style '(face empty indentation::space tab trailing)))
 #+END_SRC
 
-** Workspaces
+** Workspaces / Sessions
 
 | =eyebrowse= | https://depp.brause.cc/eyebrowse/ |
 
@@ -1628,6 +1628,14 @@ Python.
         eyebrowse-default-workspace-slot 0)
   :config
   (eyebrowse-mode t))
+#+END_SRC
+
+Set default desktop location.
+
+FIXME: not working
+
+#+BEGIN_SRC emacs-lisp
+(setq-default desktop-base-file-name "desktop")
 #+END_SRC
 
 * Config
@@ -1776,7 +1784,8 @@ See all available snippets in the `org-structure-template-alist` and
 #+BEGIN_SRC emacs-lisp
 (use-package tramp
   :init
-  (setq tramp-default-method "scp"))
+  (setq tramp-default-method "ssh")
+  (setq tramp-default-host "spartan"))
 #+END_SRC
 
 In order to open a file on a remote machine, you can use,
@@ -1912,6 +1921,10 @@ tool for Emacs.
     (kbd "<tab>") #'org-cycle))
 ;;     (kbd "C-j") #'me/org-show-next-heading-tidily
 ;;     (kbd "C-k") #'me/org-show-previous-heading-tidily)))
+
+(defun me//confirm-babel-evaluate (lang body)
+  (not (member lang '("emacs-lisp"))))
+(setq org-confirm-babel-evaluate 'me//confirm-babel-evaluate)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -2248,7 +2261,7 @@ the major mode keybind. We choose =,,= for the prefix.
   "bD" 'crux-kill-other-buffers
   "bo" '(:ignore t :which-key "crux-open-with...")
   "bo" '(lambda ()(interactive) (crux-open-with t))
-  "bs" 'me/switch-to-scratch
+  "bs" 'scratch-buffer
   "bm" 'me/switch-to-messages
   "br" 'revert-buffer
   "bt" 'crux-transpose-windows
@@ -2446,34 +2459,39 @@ the major mode keybind. We choose =,,= for the prefix.
   "lr"    'eyebrowse-rename-window-config
   "ld"    '(:ignore t :which-key "delete  workspace")
   "ld"    'eyebrowse-close-window-config
-  "ls"    '(:ignore t :which-key "switch  workspace")
-  "ls"    'eyebrowse-switch-to-window-config
+  "ll"    '(:ignore t :which-key "list  workspace")
+  "ll"    'eyebrowse-switch-to-window-config
   "lj"    '(:ignore t :which-key "next workspace")
   "lj"    'eyebrowse-next-window-config
   "lk"    '(:ignore t :which-key "previous workspace")
   "lk"    'eyebrowse-prev-window-config
   "l TAB" '(:ignore t :which-key "last workspace")
   "l TAB" 'eyebrowse-last-window-config
-  "l1"     '(:ignore t :which-key "goto 1")
+  "l1"    '(:ignore t :which-key "goto 1")
   "l1"    'eyebrowse-switch-to-window-config-1
-  "l2"     '(:ignore t :which-key "goto 2")
+  "l2"    '(:ignore t :which-key "goto 2")
   "l2"    'eyebrowse-switch-to-window-config-2
-  "l3"     '(:ignore t :which-key "goto 3")
+  "l3"    '(:ignore t :which-key "goto 3")
   "l3"    'eyebrowse-switch-to-window-config-3
-  "l4"     '(:ignore t :which-key "goto 4")
+  "l4"    '(:ignore t :which-key "goto 4")
   "l4"    'eyebrowse-switch-to-window-config-4
-  "l5"     '(:ignore t :which-key "goto 5")
+  "l5"    '(:ignore t :which-key "goto 5")
   "l5"    'eyebrowse-switch-to-window-config-5
-  "l6"     '(:ignore t :which-key "goto 6")
+  "l6"    '(:ignore t :which-key "goto 6")
   "l6"    'eyebrowse-switch-to-window-config-6
-  "l7"     '(:ignore t :which-key "goto 7")
+  "l7"    '(:ignore t :which-key "goto 7")
   "l7"    'eyebrowse-switch-to-window-config-7
-  "l8"     '(:ignore t :which-key "goto 8")
+  "l8"    '(:ignore t :which-key "goto 8")
   "l8"    'eyebrowse-switch-to-window-config-8
-  "l9"     '(:ignore t :which-key "goto 9")
+  "l9"    '(:ignore t :which-key "goto 9")
   "l9"    'eyebrowse-switch-to-window-config-9
-  "l0"     '(:ignore t :which-key "goto 0")
-  "l0"    'eyebrowse-switch-to-window-config-0)
+  "l0"    '(:ignore t :which-key "goto 0")
+  "l0"    'eyebrowse-switch-to-window-config-0
+  "ls"    '(:ignore t :which-key "sessions")
+  "lss"   '(:ignore t :which-key "save session")
+  "lss"   '(lambda()(interactive)(desktop-save (me/cache-concat "desktops")))
+  "lsr"   '(:ignore t :which-key "restore session")
+  "lsr"   '(lambda()(interactive)(desktop-read (me/cache-concat "desktops"))))
 #+END_SRC
 
 ** [n]arrow and widen
