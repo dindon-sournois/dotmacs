@@ -3,9 +3,8 @@
 ;; File introduced in emacs 27.1, it is run before init.el, before package and
 ;; UI initialization.
 
-
 (defconst me/cache-directory
-  (concat user-emacs-directory ".cache/")
+  (concat user-emacs-directory "cache/")
   "Directory where all cache files should be saved.")
 
 ;; Compile .eln files in cache folder

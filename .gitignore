@@ -1,4 +1,4 @@
 eln-cache
 dotmacs.el
-.cache
+cache
 *.elc

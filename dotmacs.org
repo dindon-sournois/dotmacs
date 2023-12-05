@@ -11,9 +11,11 @@ features into Emacs. The shortcuts are heavily inspired by Spacemacs: they
 should be mnemonics, consistent, and should not rely on modifiers.
 
 They are instead based on key combinations using a leader/prefix key. =SPC= is
-used as the main leader key while =,= is used for mode-specific keybindings. To
-configure keybindings easily I use =general= while =which-key= is used for key
-discoverability.
+used as the main leader key while =,= is used for mode-specific keybindings. You
+can toggle between evil and emacs with =M-z=
+
+To configure keybindings easily I use =general= while =which-key= is used for
+key discoverability.
 
 When possible, transient-states are used. Those allow to repeat keybindings
 without entering the prefix key again. Those are implemented using =hercules=.
@@ -25,7 +27,9 @@ Lots of functions have been directly taken from the Spacemacs project.
 ** Installation
 
 Backup your init files if necessary and copy this current file (=dotmacs.org=),
-=init.el= and =early-init.el= in =~/.emacs.d=.
+=init.el= and =early-init.el= in =~/.emacs.d=. You can also =git clone= this
+repo and add =--recursive= to also get the =elpa= folder which avoid fetching
+packages later (might not be up-to-date, of course).
 
 Next time, simply reload changes with =<SPC> f e r=.
 
@@ -343,10 +347,11 @@ Change a few indenting behaviors.
 (put 'plist-put 'lisp-indent-function 2)
 #+END_SRC
 
-** Cache & Backups
+** Cache, garbage collection, tmp files
 
-Use =.cache/= to contain local data. This is to avoid littering in the Emacs
-directory with an ever-growing number of packages used on a daily basis.
+Use =<user-emacs-directory>/cache/= to store temporary data. This is to avoid
+littering in the Emacs and project directories with an ever-growing number of
+cache files (=.*~=, =.#*=, =.*.~undo-tree~=, etc.).
 
 #+BEGIN_SRC emacs-lisp
 (defmacro me|set-in-cache-dir (var loc)
@@ -358,7 +363,7 @@ directory with an ever-growing number of packages used on a daily basis.
   `(custom-set-variables '(,var (me/cache-concat ,loc))))
 #+END_SRC
 
-For network related cache files:
+*** For network related cache files
 
 #+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'request
@@ -368,6 +373,84 @@ For network related cache files:
 (with-eval-after-load 'url
   (me|set-in-cache-dir url-configuration-directory "url/"))
 #+END_SRC
+
+*** =.*~=
+
+Prevent emacs from creating backup files (created at save) everywhere.
+
+#+BEGIN_SRC emacs-lisp
+(let ((backup-dir (me/cache-concat "backup/")))
+  (when (not (file-directory-p backup-dir))
+    (make-directory backup-dir t))
+  (setq backup-directory-alist `(("." . ,backup-dir))
+        tramp-backup-directory-alist backup-directory-alist))
+#+END_SRC
+
+Add more backups. We always make backups by copying. Safe, but slow. If that's
+too slow see =backup-by-copying-when-linked=.
+
+#+BEGIN_SRC emacs-lisp
+(setq make-backup-files t
+      vc-make-backup-files t
+      backup-by-copying t
+      delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)
+#+END_SRC
+
+*** =.#*=
+
+Do the same for auto-save files (created at modification, deleted at save).
+
+#+BEGIN_SRC emacs-lisp
+(let ((auto-saves-dir (me/cache-concat "auto-saves/")))
+  (when (not (file-directory-p auto-saves-dir))
+    (make-directory auto-saves-dir t))
+  (setq auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
+        tramp-auto-save-directory auto-saves-dir))
+#+END_SRC
+#+END_SRC
+
+*** =.*.~undo-tree~=
+
+Change undo-tree files location (created at save).
+
+#+BEGIN_SRC emacs-lisp
+; TODO: Make it work with symbolic links.
+(setq undo-tree-history-directory-alist `(("." . ,(me/cache-concat "undos"))))
+#+END_SRC
+
+*** Change other temporary files locations
+
+#+BEGIN_SRC emacs-lisp
+(me|set-in-cache-dir bookmark-default-file "org-bookmarks")
+(me|set-in-cache-dir eshell-directory-name "eshell")
+(me|set-in-cache-dir helm-adaptive-history-file "helm-adaptive-history")
+(me|set-in-cache-dir lsp-session-file "lsp-session-v1")
+(me|set-in-cache-dir recentf-save-file "recentf")
+(me|set-in-cache-dir transient-history-file "transient/history.el")
+(me|set-in-cache-dir transient-levels-file "transient/levels.el")
+(me|set-in-cache-dir transient-values-file "transient/values.el")
+#+END_SRC
+
+*** Native compiled files
+
+Native compiled files (=.elc=) are also stored in =cache= but it is done in
+=early-init.el= to make sure all compiled files go into the cache.
+
+*** Disable customize
+
+The =customize-*= routines writes directly at the end of the =user-init-file= or
+into a dedicated file when set accordingly. This feature is completely disabled
+and I redirect the writing to =/dev/null=.
+
+#+BEGIN_SRC emacs-lisp
+(setq-default custom-file null-device)
+#+END_SRC
+
+*** Gargage collection
 
 Garbage-collect on focus-out, Emacs /should/ feel snappier overall.
 
@@ -379,56 +462,6 @@ Garbage-collect on focus-out, Emacs /should/ feel snappier overall.
       (unless (frame-focus-state)
         (garbage-collect)))))
 #+END_SRC
-
-The =customize-*= routines writes directly at the end of the =user-init-file= or
-into a dedicated file when set accordingly. This feature is completely disabled
-and I redirect the writing to =/dev/null=.
-
-#+BEGIN_SRC emacs-lisp
-(setq-default custom-file null-device)
-#+END_SRC
-
-Prevent emacs from creating backup files everywhere.
-
-#+BEGIN_SRC emacs-lisp
-(let ((backup-dir (me/cache-concat "backup/"))
-      (auto-saves-dir (me/cache-concat "auto-saves/")))
-  (dolist (dir (list backup-dir auto-saves-dir))
-    (when (not (file-directory-p dir))
-      (make-directory backup-dir t)))
-  (setq backup-directory-alist `(("." . ,backup-dir))
-        auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
-        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
-        tramp-backup-directory-alist `((".*" . ,backup-dir))
-        tramp-auto-save-directory auto-saves-dir))
-#+END_SRC
-
-Add more backups. We always make backups by copying. Safe, but slow. If that's
-too slow see =backup-by-copying-when-linked=.
-
-#+BEGIN_SRC emacs-lisp
-(setq make-backup-files t vc-make-backup-files t
-      backup-by-copying t delete-old-versions t kept-new-versions
-      6 kept-old-versions 2 version-control t)
-#+END_SRC
-
-Change other temporary files locations.
-
-#+BEGIN_SRC emacs-lisp
-(me|set-in-cache-dir bookmark-default-file "org-bookmarks")
-(me|set-in-cache-dir eshell-directory-name "eshell")
-(me|set-in-cache-dir helm-adaptive-history-file "helm-adaptive-history")
-(me|set-in-cache-dir lsp-session-file "lsp-session-v1")
-(me|set-in-cache-dir recentf-save-file "recentf")
-(me|set-in-cache-dir transient-history-file "transient/history.el")
-(me|set-in-cache-dir transient-levels-file "transient/levels.el")
-(me|set-in-cache-dir transient-values-file "transient/values.el")
-(setq undo-tree-history-directory-alist
-      `(("." . ,(me/cache-concat "undos"))))
-#+END_SRC
-
-Native compiled files (=.elc=) are also stored in =.cache= but it is done in
-=early-init.el= to make sure all compiled files go into the cache.
 
 ** Packages
 |               |                                         |
@@ -478,7 +511,7 @@ Improve default `list-packages`.
   :config (paradox-enable))
 #+END_SRC
 
-To update packages do ~SPC f u~, then mark packages for upgrade with ~U~ and
+To update packages do ~<SPC> f u~, then mark packages for upgrade with ~U~ and
 upgrade them with ~x~.
 
 Load additionnal elisp files.
@@ -493,11 +526,23 @@ Load additionnal elisp files.
 Check we have all we need installed.
 
 #+BEGIN_SRC emacs-lisp
-(dolist (exe (list "clangd" ; C/C++ LSP server
-                   "fortls" ; Fortran LSP server
-                   "rg"))   ; fastest grep in the west
+(dolist (exe (list "clangd" ; C/C++ LSP server https://github.com/clangd/clangd
+                   "fortls" ; Fortran LSP server https://github.com/fortran-lang/fortls
+                   "rg"))   ; fastest grep in the west https://github.com/BurntSushi/ripgrep
   (when (not (executable-find exe))
     (message "Warning: Executable %s not found." exe)))
+#+END_SRC
+
+** Bug hunter
+
+Because emacs default error backtrace sucks...
+
+| =bug-hunter= | https://github.com/Malabarba/elisp-bug-hunter |
+
+/Automatically debug and bisect your init (.emacs) file!/
+
+#+BEGIN_SRC emacs-lisp
+(use-package bug-hunter)
 #+END_SRC
 
 * Core Packages
@@ -1601,7 +1646,7 @@ Easily compare and alter files side-by-side.
   (setq vdiff-subtraction-fill-char ?-))
 #+END_SRC
 
-** Window auo-resize
+** Window auto-resize
 
 | =golden-ratio= | https://github.com/roman/golden-ratio.el |
 
@@ -1827,12 +1872,12 @@ See all available snippets in the `org-structure-template-alist` and
 
 In order to open a file on a remote machine, you can use,
 
-~SPC f f /user@your.host.com:/path/to/file~
+~<SPC> f f /user@your.host.com:/path/to/file~
 
 TRAMP mode can also be used to edit files on the same machine as
 another user, if you want to open some file as root you can use,
 
-~SPC f f /root@127.0.0.1:/path/to/file~
+~<SPC> f f /root@127.0.0.1:/path/to/file~
 
 We explicitly tell tramp to /leave ControlMaster the fuck alone/, so that the
 defaults in =.ssh/config= actually work:

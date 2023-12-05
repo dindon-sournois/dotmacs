@@ -21,7 +21,7 @@
 ;; Already defined with `early-init.el'
 (when (version< emacs-version "27.1")
   (defconst me/cache-directory
-    (concat user-emacs-directory ".cache/")
+    (concat user-emacs-directory "cache/")
     "Directory where all cache files should be saved."))
 
 (defun me/cache-concat (name)
@@ -55,6 +55,3 @@
 
   ;; Collect garbage when all else is done
   (garbage-collect))
-
-;; Setup debug backtrace
-;(toggle-debug-on-error 1)
