@@ -1884,6 +1884,10 @@ Make file starting with shebang executable on save.
 #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
   :mode (rx (or "INSTALL" "CONTRIBUTORS" "LICENSE" "README" ".mdx") eos))
+
+; automatically display images but limit their size
+(setq markdown-max-image-size (cons 560 560)) ; in pixels
+(add-hook 'markdown-mode-hook #'markdown-display-inline-images)
 #+END_SRC
 
 ** Org
@@ -2637,10 +2641,18 @@ the major mode keybind. We choose =,,= for the prefix.
 #+BEGIN_SRC emacs-lisp
 (me/leader-def
   :states '(normal visual)
+  "xz" '(:ignore t :which-key "text scaling")
+  "xz+" '(:ignore t :which-key "text increase scaling")
   "xz+" 'text-scale-increase
+  "xz-" '(:ignore t :which-key "text decrease scaling")
   "xz-" 'text-scale-decrease
+  "xz=" '(:ignore t :which-key "text reset scaling")
+  "xz=" '(lambda()(interactive)(text-scale-set 0))
+  "x=" '(:ignore t :which-key "number increment")
   "x=" 'evil-numbers/inc-at-pt
+  "x+" '(:ignore t :which-key "number increment")
   "x+" 'evil-numbers/inc-at-pt
+  "x-" '(:ignore t :which-key "number decrement")
   "x-" 'evil-numbers/dec-at-pt
   "x." '(:ignore t :which-key "transient")
   "x." 'me//transient-evil-numbers)
