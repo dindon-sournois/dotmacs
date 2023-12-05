@@ -253,6 +253,11 @@ ignore case."
   (condition-case-unless-debug nil
       (delete-frame nil 1)
     (error (make-frame-invisible nil 1))))
+
+(defun me/suspend()
+  "Suspend only if running from terminal."
+  (interactive)
+  (if (display-graphic-p) nil (suspend-frame)))
 #+END_SRC
 
 ** Windows
@@ -426,15 +431,12 @@ Native compiled files (=.elc=) are also stored in =.cache= but it is done in
 =early-init.el= to make sure all compiled files go into the cache.
 
 ** Packages
-
-# TODO: Toogle between online and local
-# TODO: Setup offline repo with minimal dep
-| =elpa-mirror= | https://github.com/redguardtoo/elpa-mirror |
-
+|               |                                         |
 | =package=     | Built-in                                |
 | =use-package= | https://github.com/jwiegley/use-package |
+| =paradox=     | https://github.com/Malabarba/paradox    |
 
-Setup offline repositories.
+Setup repositories and proxy.
 
 #+BEGIN_SRC emacs-lisp
 ;; (setq url-proxy-services
@@ -448,8 +450,6 @@ Setup offline repositories.
 (me/add-to-list-multi
  'package-archives
  (list
-  ;; '("gnu_local"   . "~/emacs-pkgs/gnu")
-  ;; '("melpa_local" . "~/emacs-pkgs/melpa")
   '("melpa"       . "https://melpa.org/packages/")
   '("gnu"         . "https://elpa.gnu.org/packages/")
   '("org"         . "https://orgmode.org/elpa/")
@@ -458,18 +458,30 @@ Setup offline repositories.
  t) ; from highest priority to lowest (`append' flag)
 #+END_SRC
 
-Install the =use-package= dependency.
+Setup the =use-package= dependency.
 
 #+BEGIN_SRC emacs-lisp
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-(setq use-package-always-ensure t
-      use-package-always-defer nil
-      use-package-expand-minimally t)
+(eval-and-compile
+  (setq use-package-always-ensure t
+        use-package-always-defer nil
+        use-package-expand-minimally t))
 #+END_SRC
 
-Loading additionnal elisp files.
+Improve default `list-packages`.
+
+#+BEGIN_SRC emacs-lisp
+(use-package paradox
+  :ensure ; XXX: why do I need this if I have `use-package-always-ensure` ??
+  :config (paradox-enable))
+#+END_SRC
+
+To update packages do ~SPC f u~, then mark packages for upgrade with ~U~ and
+upgrade them with ~x~.
+
+Load additionnal elisp files.
 
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'load-path (expand-file-name "lisp/"
@@ -579,7 +591,9 @@ and provides facilities for writing custom extensions.
         evil-undo-system 'undo-tree
         evil-symbol-word-search t
         evil-want-integration t    ; leave this on for evil-collection
-        evil-want-keybinding nil)  ; let evil-collection do the rebinding
+        evil-want-keybinding nil  ; let evil-collection do the rebinding
+        evil-toggle-key "M-z") ; rebind useless `zap-to-char` to keep "C-z" for
+                               ; suspending emacs from the terminal
   :config
   (evil-mode 1))
 #+END_SRC
@@ -600,7 +614,6 @@ Paste transient state.
  :keymap 'transient-paste-map
  :transient t)
 #+END_SRC
-
 
 Motions and text objects for delimited arguments in Evil.
 
@@ -737,6 +750,16 @@ Supplemental =evil-mode= keybindings to emacs =org-mode= ([[https://github.com/S
   (add-hook 'org-mode-hook
             (lambda () (define-key evil-normal-state-map
                                    (kbd "RET") 'org-return))))
+#+END_SRC
+
+Disable =evil= in some modes.
+
+#+BEGIN_SRC emacs-lisp
+; TODO: prettify this
+(cl-loop for (mode . state) in '(
+                              (paradox-menu-mode . emacs)
+                              )
+      do (evil-set-initial-state mode state))
 #+END_SRC
 
 ** Fuzzy completion everywhere (=helm=)
@@ -923,12 +946,26 @@ emacs.verticalScrollBars: off
 You might still need this for an emacs without x-toolkit:
 
 #+BEGIN_SRC emacs-lisp
-(menu-bar-mode 1)
+(menu-bar-mode -1)
+#+END_SRC
+
+I find myself using the =menu-bar= on the GUI, so enable it in this case.
+
+#+BEGIN_SRC emacs-lisp
+(defun me//contextual-menubar (&optional frame)
+  "Display the menubar in FRAME (default: selected frame) if on a
+    graphical display, but hide it if in terminal."
+  (interactive)
+  (if (display-graphic-p frame)
+ (menu-bar-mode 1)
+ (menu-bar-mode 0)))
+
+(add-hook 'after-make-frame-functions 'me//contextual-menubar)
 #+END_SRC
 
 Change font to a powerline-patched one.
 
-,#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ;; (set-default-font "Dejavu Sans Mono for Powerline")
 (set-face-attribute 'default nil :height 100) ;; format: 1/X pt
 #+END_SRC
@@ -1020,6 +1057,8 @@ Install spacemacs's powerline.
 
 #+BEGIN_SRC emacs-lisp
 (use-package spaceline
+  :init
+  (setq powerline-default-separator 'wave))
   :config
   (spaceline-spacemacs-theme)
   (spaceline-helm-mode 1)
@@ -1038,8 +1077,6 @@ Install spacemacs's powerline.
   (diminish 'helm-mode "Hlm")
   (diminish 'which-key-mode "WhKy")
   (diminish 'flycheck-mode "FlChk")
-  :init
-  (setq powerline-default-separator 'wave))
   (spaceline-compile)
 #+END_SRC
 
@@ -2014,6 +2051,11 @@ tool for Emacs.
 ;;  :keymaps '(fundamental-mode prog-mode-map text-mode-map)
 ;;  "," nil)
 
+(general-def
+  :prefix nil
+  "C-z"  '(:ignore t :which-key "suspend emacs")
+  "C-z" 'me/suspend)
+
 (me/leader-def
   :states '(normal visual)
   "SPC" 'helm-M-x
@@ -2380,13 +2422,14 @@ the major mode keybind. We choose =,,= for the prefix.
   "fF"  'helm-find-files
   "fg"  'rgrep
   "fl"  'find-file-literally
-  ;;  "fE"  'spacemacs/sudo-edit
-  ;;  "fE"  'crux-reopen-as-root-mode
+  "fE"  'spacemacs/sudo-edit
+  ;;  "fE"  'crux-reopen-as-root
   "fo"  'spacemacs/open-file-or-directory-in-external-app
   "fr"  'helm-recentf
   "fR"  'spacemacs/rename-current-buffer-file
   "fS"  'evil-write-all
   "fs"  'save-buffer
+  "fu"  'paradox-list-packages
   "fy"  'spacemacs/show-and-copy-buffer-filename)
 #+END_SRC
 
