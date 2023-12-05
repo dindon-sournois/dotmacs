@@ -1857,7 +1857,24 @@ FIXME: not working
 (no-dots/post-init-helm)
 #+END_SRC
 
+** Vertical ediff by default
+
+#+BEGIN_SRC emacs-lisp
+(custom-set-variables
+ '(ediff-window-setup-function 'ediff-setup-windows-plain)
+ '(ediff-diff-options "-w")
+ '(ediff-split-window-function 'split-window-horizontally))
+#+END_SRC
+
 * Languages
+** Ascii Doc
+
+| =adoc-mode= | https://github.com/bbatsov/adoc-mode |
+
+#+BEGIN_SRC emacs-lisp
+(use-package adoc-mode)
+#+END_SRC
+
 ** Bash
 
 Make file starting with shebang executable on save.
