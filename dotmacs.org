@@ -437,10 +437,10 @@ Native compiled files (=.elc=) are also stored in =.cache= but it is done in
 Setup offline repositories.
 
 #+BEGIN_SRC emacs-lisp
-(setq url-proxy-services
-  '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-    ("http" . "spartan0:33000")
-    ("https" . "spartan0:33000")))
+;; (setq url-proxy-services
+;;   '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+;;     ("http" . "spartan0:33000")
+;;     ("https" . "spartan0:33000")))
 
 (require 'package)
 (package-initialize)
@@ -465,7 +465,8 @@ Install the =use-package= dependency.
   (package-refresh-contents)
   (package-install 'use-package))
 (setq use-package-always-ensure t
-      use-package-always-defer nil)
+      use-package-always-defer nil
+      use-package-expand-minimally t)
 #+END_SRC
 
 Loading additionnal elisp files.
@@ -862,7 +863,7 @@ Display available keybindings in a popup.
 #+BEGIN_SRC emacs-lisp
 (use-package which-key
   :init
-  (setq which-key-idle-delay 1.5
+  (setq which-key-idle-delay 1
         which-key-idle-secondary-delay 0.05
         which-key-sort-order 'which-key-key-order-alpha
         which-key-sort-uppercase-first nil
@@ -946,8 +947,7 @@ Change frame name of emacs.
 Install Spacemacs themes.
 
 #+BEGIN_SRC emacs-lisp
-(use-package spacemacs-common
-  :ensure spacemacs-theme
+(use-package spacemacs-theme
   :init (setq spacemacs-theme-comment-bg nil)
   :config (load-theme 'spacemacs-dark t))
 #+END_SRC
@@ -2045,6 +2045,7 @@ tool for Emacs.
   :keymap 'org-mode-map
   "C-j" 'me/org-show-next-heading-tidily
   "C-k" 'me/org-show-previous-heading-tidily)
+
 (me/leader-mode-def
   :keymaps 'org-mode-map
   "b"  '(:ignore t :which-key "babel")
@@ -2589,6 +2590,7 @@ the major mode keybind. We choose =,,= for the prefix.
   "Ts" 'helm-themes
   "Tk" 'me/theme-cycle-backward
   "Tj" 'me/theme-cycle
+  "Tm" 'menu-bar-mode
   "Tz" 'zone)
 #+END_SRC
 
