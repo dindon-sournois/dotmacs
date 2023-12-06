@@ -209,10 +209,6 @@ Removes the automatic guessing of the initial value based on thing at point. "
 (defun me/switch-to-messages()
   (interactive)
   (switch-to-buffer "*Messages*"))
-
-(defun me/switch-to-scratch()
-  (interactive)
-  (switch-to-buffer "*scratch*"))
 #+END_SRC
 
 ** Format
@@ -353,25 +349,39 @@ Use =<user-emacs-directory>/cache/= to store temporary data. This is to avoid
 littering in the Emacs and project directories with an ever-growing number of
 cache files (=.*~=, =.#*=, =.*.~undo-tree~=, etc.).
 
+*** Some utilities functions
+
 #+BEGIN_SRC emacs-lisp
+(defun me/tmp-concat (name)
+  "Return the absolute path of NAME under `me/tmp-directory'."
+  (concat me/tmp-directory name))
+
+(defun me/cache-concat (name)
+  "Return the absolute path of NAME under `me/cache-directory'."
+  (concat me/cache-directory name))
+
+(defmacro me|set-in-tmp-dir (var loc)
+  "Set VAR to LOC concatenated with the cache directory."
+  `(setq ,var (me/tmp-concat ,loc)))
+
 (defmacro me|set-in-cache-dir (var loc)
   "Set VAR to LOC concatenated with the cache directory."
   `(setq ,var (me/cache-concat ,loc)))
 
-(defmacro me|custom-set-in-cache-dir (var loc)
-  "Customize VAR to LOC concatenated with the cache directory."
-  `(custom-set-variables '(,var (me/cache-concat ,loc))))
+;; (defmacro me|custom-set-in-cache-dir (var loc)
+;;   "Customize VAR to LOC concatenated with the cache directory."
+;;   `(custom-set-variables '(,var (me/cache-concat ,loc))))
 #+END_SRC
 
 *** For network related cache files
 
 #+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'request
-  (me|set-in-cache-dir request-storage-directory "request/"))
+  (me|set-in-tmp-dir request-storage-directory "request/"))
 (with-eval-after-load 'tramp
-  (me|set-in-cache-dir tramp-persistency-file-name "tramp.eld"))
-(with-eval-after-load 'url
-  (me|set-in-cache-dir url-configuration-directory "url/"))
+  (me|set-in-tmp-dir tramp-persistency-file-name "tramp.eld"))
+;(with-eval-after-load 'url
+;  (me|set-in-tmp-dir url-configuration-directory "url/"))
 #+END_SRC
 
 *** =.*~=
@@ -379,7 +389,7 @@ cache files (=.*~=, =.#*=, =.*.~undo-tree~=, etc.).
 Prevent emacs from creating backup files (created at save) everywhere.
 
 #+BEGIN_SRC emacs-lisp
-(let ((backup-dir (me/cache-concat "backup/")))
+(let ((backup-dir (me/tmp-concat "backup/")))
   (when (not (file-directory-p backup-dir))
     (make-directory backup-dir t))
   (setq backup-directory-alist `(("." . ,backup-dir))
@@ -404,10 +414,10 @@ too slow see =backup-by-copying-when-linked=.
 Do the same for auto-save files (created at modification, deleted at save).
 
 #+BEGIN_SRC emacs-lisp
-(let ((auto-saves-dir (me/cache-concat "auto-saves/")))
+(let ((auto-saves-dir (me/tmp-concat "auto-saves/")))
   (when (not (file-directory-p auto-saves-dir))
     (make-directory auto-saves-dir t))
-  (setq auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+  (setq ; auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
         auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
         tramp-auto-save-directory auto-saves-dir))
 #+END_SRC
@@ -419,20 +429,21 @@ Change undo-tree files location (created at save).
 
 #+BEGIN_SRC emacs-lisp
 ; TODO: Make it work with symbolic links.
-(setq undo-tree-history-directory-alist `(("." . ,(me/cache-concat "undos"))))
+(setq undo-tree-history-directory-alist `(("." . ,(me/tmp-concat "undos"))))
 #+END_SRC
 
-*** Change other temporary files locations
+*** Change other cache/tmp files locations
 
 #+BEGIN_SRC emacs-lisp
 (me|set-in-cache-dir bookmark-default-file "org-bookmarks")
 (me|set-in-cache-dir eshell-directory-name "eshell")
 (me|set-in-cache-dir helm-adaptive-history-file "helm-adaptive-history")
-(me|set-in-cache-dir lsp-session-file "lsp-session-v1")
 (me|set-in-cache-dir recentf-save-file "recentf")
-(me|set-in-cache-dir transient-history-file "transient/history.el")
-(me|set-in-cache-dir transient-levels-file "transient/levels.el")
-(me|set-in-cache-dir transient-values-file "transient/values.el")
+
+(me|set-in-tmp-dir lsp-session-file "lsp-session-v1")
+(me|set-in-tmp-dir transient-history-file "transient/history.el")
+(me|set-in-tmp-dir transient-levels-file "transient/levels.el")
+(me|set-in-tmp-dir transient-values-file "transient/values.el")
 #+END_SRC
 
 *** Native compiled files
@@ -1646,7 +1657,7 @@ Easily compare and alter files side-by-side.
   (setq vdiff-subtraction-fill-char ?-))
 #+END_SRC
 
-** Window auto-resize
+** Window auo-resize
 
 | =golden-ratio= | https://github.com/roman/golden-ratio.el |
 

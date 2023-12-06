@@ -9,7 +9,32 @@
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 
-;; Default init and cache location
+;; set tmp and cache directories
+(defconst me/tmp-directory
+  (concat temporary-file-directory "emacs-" user-login-name "/")
+  "Directory where all tmp files should be saved.")
+(setq temporary-file-directory me/tmp-directory)
+
+(defconst me/cache-directory
+  (concat user-emacs-directory "cache/")
+  "Directory where all cache files should be saved.")
+
+;; create tmp and cache directories
+(when (not (file-directory-p me/tmp-directory))
+  (make-directory me/tmp-directory t)
+  (chmod me/tmp-directory (file-modes-symbolic-to-number "u+rwx,go-rwx")))
+
+(when (not (file-directory-p me/cache-directory))
+  (make-directory me/cache-directory t))
+
+;; compile .eln files in cache folder
+(setq native-comp-eln-load-path
+      (append (list (concat me/cache-directory "eln"))
+              (cdr native-comp-eln-load-path)))
+(setq-default package-native-compile t
+              native-comp-async-report-warnings-errors 'silent)
+
+;; default init files location
 (defconst me-config-file
   (concat user-emacs-directory "dotmacs.el")
   "The location of the generated elisp config file.")
@@ -23,10 +48,6 @@
   (defconst me/cache-directory
     (concat user-emacs-directory "cache/")
     "Directory where all cache files should be saved."))
-
-(defun me/cache-concat (name)
-  "Return the absolute path of NAME under `me/cache-directory'."
-  (concat me/cache-directory name))
 
 (defun me/reload-user-org-file ()
   "Reload emacs configuration."
