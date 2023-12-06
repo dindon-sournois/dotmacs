@@ -12,7 +12,7 @@ should be mnemonics, consistent, and should not rely on modifiers.
 
 They are instead based on key combinations using a leader/prefix key. =SPC= is
 used as the main leader key while =,= is used for mode-specific keybindings. You
-can toggle between evil and emacs with =M-z=
+can toggle between evil and emacs with =M-z=.
 
 To configure keybindings easily I use =general= while =which-key= is used for
 key discoverability.
