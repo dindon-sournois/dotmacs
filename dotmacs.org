@@ -310,7 +310,8 @@ Here are what I consider better defaults as per my own experience.
  ;;warning-minimum-level :error           ; Skip warning buffers
  ;;window-combination-resize t            ; Resize windows proportionally
  ;;x-stretch-cursor t                     ; Stretch cursor to the glyph width
- vc-follow-symlinks t)                  ; Open symlinks without confirmation
+ vc-follow-symlinks t                  ; Open symlinks without confirmation
+ ring-bell-function 'ignore)           ; Because who needs that
 
 (blink-cursor-mode 0)                   ; Prefer a still cursor
 (delete-selection-mode 1)               ; Replace region when inserting text
@@ -2993,3 +2994,9 @@ multiplicative.
 ; XXX: 26.3 (add-to-list 'lsp-clients-clangd-args "--enable-config")
 #+END_SRC
 
+
+
+** TMP
+
+#+BEGIN_SRC emacs-lisp :tangle no
+#+END_SRC
