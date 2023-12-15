@@ -346,9 +346,10 @@ Change a few indenting behaviors.
 
 ** Cache, garbage collection, tmp files
 
-Use =<user-emacs-directory>/cache/= to store temporary data. This is to avoid
-littering in the Emacs and project directories with an ever-growing number of
-cache files (=.*~=, =.#*=, =.*.~undo-tree~=, etc.).
+Use =<user-emacs-directory>/cache/= to store cache data (e.g. projectile files,
+=*.eln=) and =/tmp/emacs-<user-login-name>= to store temporary data (e.g. =.*~=,
+=.#*=, =.*.~undo-tree~=). This is to avoid littering in the Emacs and project
+directories with an ever-growing number of cache files.
 
 *** Some utilities functions
 
@@ -381,8 +382,8 @@ cache files (=.*~=, =.#*=, =.*.~undo-tree~=, etc.).
   (me|set-in-tmp-dir request-storage-directory "request/"))
 (with-eval-after-load 'tramp
   (me|set-in-tmp-dir tramp-persistency-file-name "tramp.eld"))
-;(with-eval-after-load 'url
-;  (me|set-in-tmp-dir url-configuration-directory "url/"))
+(with-eval-after-load 'url
+  (me|set-in-tmp-dir url-configuration-directory "url/"))
 #+END_SRC
 
 *** =.*~=
@@ -418,10 +419,11 @@ Do the same for auto-save files (created at modification, deleted at save).
 (let ((auto-saves-dir (me/tmp-concat "auto-saves/")))
   (when (not (file-directory-p auto-saves-dir))
     (make-directory auto-saves-dir t))
-  (setq ; auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+  (setq
+        ;; auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+        ;; auto-save-file-name-transforms '((".*" "/tmp/emacs-dindon/auto-saves/\\1" t))
         auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
         tramp-auto-save-directory auto-saves-dir))
-#+END_SRC
 #+END_SRC
 
 *** =.*.~undo-tree~=
@@ -449,8 +451,8 @@ Change undo-tree files location (created at save).
 
 *** Native compiled files
 
-Native compiled files (=.elc=) are also stored in =cache= but it is done in
-=early-init.el= to make sure all compiled files go into the cache.
+Native compiled files (=.elc=) are stored in =cache/eln= but it is done in
+=init.el= to make sure all compiled files go into the cache.
 
 *** Disable customize
 
@@ -589,7 +591,7 @@ More convenient key definitions in emacs.
 
 ** Transient states (=hercules=)
 
-| =hercules= | https://gitlab.com/jjzmajic/hercules.el|
+| =hercules= | https://gitlab.com/jjzmajic/hercules.el |
 
 Implement transient states /a la/ spacemacs using =hercules=.
 
@@ -1100,7 +1102,9 @@ Displays current match and total matches information in the mode-line.
   :init
   ;; NOTE: Anzu inserts itself in the modeline, to let spaceline handle the
   ;; modeline
-  (setq anzu-cons-mode-line-p nil))
+  (setq anzu-cons-mode-line-p nil)
+  :config
+  (global-anzu-mode))
 #+END_SRC
 
 This package implements hiding or abbreviation of the mode line displays
@@ -1115,7 +1119,10 @@ Install spacemacs's powerline.
 #+BEGIN_SRC emacs-lisp
 (use-package spaceline
   :init
-  (setq powerline-default-separator 'wave))
+  (setq powerline-default-separator 'wave
+  spaceline-highlight-face-func 'spaceline-highlight-face-evil-state
+  spaceline-workspace-numbers-unicode nil) ; XXX: t not working
+  ;; spaceline-window-numbers-unicode to t
   :config
   (spaceline-spacemacs-theme)
   (spaceline-helm-mode 1)
@@ -1134,7 +1141,7 @@ Install spacemacs's powerline.
   (diminish 'helm-mode "Hlm")
   (diminish 'which-key-mode "WhKy")
   (diminish 'flycheck-mode "FlChk")
-  (spaceline-compile)
+  (spaceline-compile))
 #+END_SRC
 
 ** Colors
@@ -1356,12 +1363,12 @@ A tree layout file explorer for Emacs.
 
 ** Git and other VC
 
-|=magit=|https://magit.vc/|
+| =magit= | https://magit.vc/ |
 
 Complete text-based user interface to git.
 
 #+BEGIN_SRC emacs-lisp
-;; (use-package magit)
+(use-package magit)
 #+END_SRC
 
 # TODO
@@ -1375,8 +1382,27 @@ Complete text-based user interface to git.
 
 (use-package git-gutter
    :config
-   (global-git-gutter-mode nil)
-   (git-gutter:linum-setup))
+   (global-git-gutter-mode +1))
+
+(defun me//transient-gutter()(interactive))
+(general-def
+  :prefix-map 'transient-gutter-map
+  "q" '(:ignore t :which-key "quit")
+  "q" 'me//transient-gutter
+  "j" '(:ignore t :which-key "next hunk")
+  "j" 'git-gutter:next-hunk
+  "k" '(:ignore t :which-key "previous hunk")
+  "k" 'git-gutter:previous-hunk
+  "d" '(:ignore t :which-key "diff hunk")
+  "d" 'git-gutter:popup-hunk
+  "s" '(:ignore t :which-key "stage hunk")
+  "s" 'git-gutter:stage-hunk
+  "r" '(:ignore t :which-key "revert hunk")
+  "r" 'git-gutter:revert-hunk)
+(hercules-def
+ :toggle-funs 'me//transient-gutter
+ :keymap 'transient-gutter-map
+ :transient t)
 #+END_SRC
 
 ** Highlight keywords
@@ -2561,6 +2587,7 @@ the major mode keybind. We choose =,,= for the prefix.
   "j."  '(:ignore t :which-key "transient")
   "j."  'me//transient-jump
   "j0"  'spacemacs/push-mark-and-goto-beginning-of-line
+  "jg"  'me//transient-gutter
   "jI"  'helm-imenu-in-all-buffers
   "ji"  'helm-imenu
   "jj"  'evil-jump-forward
@@ -2920,9 +2947,9 @@ multiplicative.
 ** Packages to check
 
 | =backup-walker= | https://github.com/lewang/backup-walker                    |
-| =helpful=       |                                                            |
-| =prettify=      |                                                            |
-| =selectrum=     |                                                            |
+| =helpful=       | https://github.com/Wilfred/helpful                         |
+| =prettify=      | ?                                                          |
+| =vertico=       | https://github.com/minad/vertico                           |
 | =marginalia=    |                                                            |
 | =evil-lispy=    |                                                            |
 |                 | https://github.com/abhishekchandratre/eyebrowse-projectile |
@@ -2954,7 +2981,6 @@ multiplicative.
 (setq uniquify-separator " * ")
 (setq uniquify-after-kill-buffer-p t)
 (setq uniquify-ignore-buffers-re "^\\*")
-
 #+END_SRC
 
 ** WIP lsp clangd
