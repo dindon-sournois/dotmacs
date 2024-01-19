@@ -1366,7 +1366,7 @@ A tree layout file explorer for Emacs.
 
 Complete text-based user interface to git.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package magit)
 #+END_SRC
 
