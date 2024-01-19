@@ -130,28 +130,6 @@ than having to call `add-to-list' multiple times."
               (buffer-string)))
            (t (concat "/sudo:root@localhost:" fname))))))
 
-(defun spacemacs//open-in-external-app (file-path)
-  "Open `file-path' in external application."
-  (cond
-   ((spacemacs/system-is-mswindows) (w32-shell-execute "open" (replace-regexp-in-string "/" "\\\\" file-path)))
-   ((spacemacs/system-is-mac) (shell-command (format "open \"%s\"" file-path)))
-   ((spacemacs/system-is-linux) (let ((process-connection-type nil))
-                                  (start-process "" nil "xdg-open" file-path)))))
-
-(defun spacemacs/open-file-or-directory-in-external-app (arg)
-  "Open current file in external application.
-If the universal prefix argument is used then open the folder
-containing the current file by the default explorer."
-  (interactive "P")
-  (if arg
-      (spacemacs//open-in-external-app (expand-file-name default-directory))
-    (let ((file-path (if (derived-mode-p 'dired-mode)
-                         (dired-get-file-for-visit)
-                       buffer-file-name)))
-      (if file-path
-          (spacemacs//open-in-external-app file-path)
-        (message "No file associated to this buffer.")))))
-
 (defun spacemacs/rename-current-buffer-file ()
   "Renames current buffer and file it is visiting."
   (interactive)
@@ -310,7 +288,8 @@ Here are what I consider better defaults as per my own experience.
  ;;warning-minimum-level :error           ; Skip warning buffers
  ;;window-combination-resize t            ; Resize windows proportionally
  ;;x-stretch-cursor t                     ; Stretch cursor to the glyph width
- vc-follow-symlinks t)                  ; Open symlinks without confirmation
+ vc-follow-symlinks t                  ; Open symlinks without confirmation
+ ring-bell-function 'ignore)           ; Because who needs that
 
 (blink-cursor-mode 0)                   ; Prefer a still cursor
 (delete-selection-mode 1)               ; Replace region when inserting text
@@ -1757,6 +1736,24 @@ FIXME: not working
 (setq-default desktop-base-file-name "desktop")
 #+END_SRC
 
+** ChatGPT / Dall-E
+
+| =chatgpt-shell= | https://github.com/xenodium/chatgpt-shell |
+
+
+#+BEGIN_SRC emacs-lisp
+(use-package chatgpt-shell
+  :custom
+  ((chatgpt-shell-openai-key
+    (lambda ()
+      (auth-source-pass-get 'secret "openai-key")))))
+
+(setq chatgpt-shell-openai-key "XXXX")
+      ;; (lambda ()
+      ;;   ;; (auth-source-pass-get 'secret "openai-key") ; alternative using pass support in auth-sources
+      ;;   (nth 0 (process-lines "pass" "show" "System/openai"))))
+#+END_SRC
+
 * Config
 ** Automatically refresh buffer when file changed on disk
 
@@ -2405,13 +2402,10 @@ the major mode keybind. We choose =,,= for the prefix.
   "bd" 'kill-this-buffer
   "bk" 'kill-buffer
   "bD" 'crux-kill-other-buffers
-  "bo" '(:ignore t :which-key "crux-open-with...")
-  "bo" '(lambda ()(interactive) (crux-open-with t))
   "bs" 'scratch-buffer
   "bm" 'me/switch-to-messages
   "br" 'revert-buffer
-  "bt" 'crux-transpose-windows
-  "bO" 'crux-open-with)
+  "bt" 'crux-transpose-windows)
 #+END_SRC
 
 ** [c]omment
@@ -2506,7 +2500,9 @@ the major mode keybind. We choose =,,= for the prefix.
   "fl"  'find-file-literally
   "fE"  'spacemacs/sudo-edit
   ;;  "fE"  'crux-reopen-as-root
-  "fo"  'spacemacs/open-file-or-directory-in-external-app
+  "fo" 'crux-open-with
+  "fO" '(:ignore t :which-key "crux-open-with (select app)")
+  "fO" '(lambda ()(interactive) (crux-open-with t))
   "fr"  'helm-recentf
   "fR"  'spacemacs/rename-current-buffer-file
   "fS"  'evil-write-all
@@ -2993,3 +2989,9 @@ multiplicative.
 ; XXX: 26.3 (add-to-list 'lsp-clients-clangd-args "--enable-config")
 #+END_SRC
 
+
+
+** TMP
+
+#+BEGIN_SRC emacs-lisp :tangle no
+#+END_SRC
