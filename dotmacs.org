@@ -1396,6 +1396,7 @@ Highlight TODO and similar keywords in comments and strings.
         '(("TODO"  . "#CC4500")
           ("WIP"   . "#CC4500")
           ("NOTE"  . "#CCCC93")
+          ("NOTES"  . "#CCCC93")
           ("FIXME" . "#CC9393")
           ("XXX+"  . "#CC9393")
           ("FAIL"  . "#8C5353")
@@ -1741,7 +1742,7 @@ FIXME: not working
 | =chatgpt-shell= | https://github.com/xenodium/chatgpt-shell |
 
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package chatgpt-shell
   :custom
   ((chatgpt-shell-openai-key
