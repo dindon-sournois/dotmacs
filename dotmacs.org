@@ -664,13 +664,13 @@ Motions and text objects for delimited arguments in Evil.
 Customizable key sequence to escape from insert state and everything else in
 Emacs.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package evil-escape
   :init
   (setq-default evil-escape-key-sequence "jk"
                 evil-escape-delay 0.3)
   :config
-  (evil-escape-mode 1))
+  (evil-escape-mode 0))
 #+END_SRC
 
 To Help comment code efficiently.
@@ -1789,8 +1789,8 @@ This can be annoying on system with slow nfs.
 (setq auto-mode-alist
       (append (mapcar 'purecopy '(
                                   ("PKGBUILD$"     . sh-mode)
-                                  ("[mM]akefile"   . makefile-mode)
-                                  ("[mM]akefile.*" . makefile-mode)
+                                  ;; ("[mM]akefile"   . makefile-mode)
+                                  ;; ("[mM]akefile.*" . makefile-mode)
                                   ("\\.cpp$"       . c-mode)
                                   ("\\.hip$"       . c-mode)
                                   ("\\.cu$"        . c-mode)
@@ -2350,6 +2350,18 @@ the major mode keybind. We choose =,,= for the prefix.
   "ws" 'lsp)
 #+END_SRC
 
+*** markdown-mode
+
+#+BEGIN_SRC emacs-lisp
+(general-def ; FIXME: not working
+  :prefix nil
+  :keymap 'markdown-mode-map
+  "M-h" 'markdown-table-move-column-left
+  "M-l" 'markdown-table-move-column-right
+  "M-k" 'markdown-table-move-row-up
+  "M-j" 'markdown-table-move-row-down)
+#+END_SRC
+
 ** [=] Format
 
 #+BEGIN_SRC emacs-lisp
@@ -2741,6 +2753,34 @@ the major mode keybind. We choose =,,= for the prefix.
 ** [w]indows
 
 #+BEGIN_SRC emacs-lisp
+(defun me//transient-window-resize()(interactive))
+(general-def
+  :prefix-map 'transient-window-resize-map
+  "q" '(:ignore t :which-key "quit")
+  "q" 'me//transient-window-resize
+  "[" '(:ignore t :which-key "shrink")
+  "[" '(lambda()(interactive)(enlarge-window -3))
+  "]" '(:ignore t :which-key "enlarge")
+  "]" '(lambda()(interactive)(enlarge-window 3))
+  "{" '(:ignore t :which-key "shrink horizontally")
+  "{" '(lambda()(interactive)(enlarge-window-horizontally -3))
+  "}" '(:ignore t :which-key "enlarge horizontally")
+  "}" '(lambda()(interactive)(enlarge-window-horizontally 3))
+  "h" '(:ignore t :which-key "left")
+  "h" 'evil-window-left
+  "l" '(:ignore t :which-key "right")
+  "l" 'evil-window-right
+  "k" '(:ignore t :which-key "up")
+  "k" 'evil-window-up
+  "j" '(:ignore t :which-key "down")
+  "j" 'evil-window-down)
+(hercules-def
+ :toggle-funs 'me//transient-window-resize
+ :keymap 'transient-window-resize-map
+ :transient t)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
 (me/leader-def
   "w"      '(:ignore t :which-key "windows")
   "w TAB"  'spacemacs/alternate-window
@@ -2773,7 +2813,9 @@ the major mode keybind. We choose =,,= for the prefix.
   "ww"     'other-window
   "w="     'balance-windows
   "w+"     'spacemacs/window-layout-toggle
-  "w_"     'spacemacs/maximize-horizontally)
+  "w_"     'spacemacs/maximize-horizontally
+  "w."     '(:ignore t :which-key "resize")
+  "w."     'me//transient-window-resize)
 #+END_SRC
 
 ** [x] transformations, words
