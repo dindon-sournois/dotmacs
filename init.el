@@ -28,11 +28,13 @@
   (make-directory me/cache-directory t))
 
 ;; compile .eln files in cache folder
+(if (native-comp-available-p)
 (setq native-comp-eln-load-path
       (append (list (concat me/cache-directory "eln"))
               (cdr native-comp-eln-load-path)))
 (setq-default package-native-compile t
               native-comp-async-report-warnings-errors 'silent)
+)
 
 ;; default init files location
 (defconst me-config-file
