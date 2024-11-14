@@ -304,7 +304,7 @@ Here are what I consider better defaults as per my own experience.
     (progn
       (tool-bar-mode -1)                      ; Disable tool bar
       (menu-bar-mode -1)                      ; Disable menu bar
-      (scroll-bar-mode -1)))                    ; Disable scroll bar
+      (scroll-bar-mode -1)))                  ; Disable scroll bar
 #+END_SRC
 
 Fix backspace when in terminal. You also need to configure your terminal to not
@@ -464,11 +464,6 @@ Garbage-collect on focus-out, Emacs /should/ feel snappier overall.
 Setup repositories and proxy.
 
 #+BEGIN_SRC emacs-lisp
-;; (setq url-proxy-services
-;;   '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-;;     ("http" . "spartan0:33000")
-;;     ("https" . "spartan0:33000")))
-
 (require 'package)
 (package-initialize)
 (setq package-archives nil)
@@ -994,7 +989,7 @@ I find myself using the =menu-bar= on the GUI, so enable it in this case.
     graphical display, but hide it if in terminal."
   (interactive)
   (if (display-graphic-p frame)
- (menu-bar-mode 1)
+ (menu-bar-mode 0)
  (menu-bar-mode 0)))
 
 (add-hook 'after-make-frame-functions 'me//contextual-menubar)
@@ -1004,7 +999,7 @@ Change font to a powerline-patched one.
 
 #+BEGIN_SRC emacs-lisp
 ;; (set-default-font "Dejavu Sans Mono for Powerline")
-(set-face-attribute 'default nil :height 100) ;; format: 1/X pt
+(set-face-attribute 'default nil :height 150) ;; format: 1/X pt
 #+END_SRC
 
 Change frame name of emacs.
@@ -1582,7 +1577,7 @@ Modern on-the-fly syntax checking.
 
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
-  :init (global-flycheck-mode)
+  :init (global-flycheck-mode nil)
   :config
   (add-hook 'after-init-hook #'global-flycheck-mode))
 #+END_SRC
@@ -1742,16 +1737,98 @@ FIXME: not working
 
 
 #+BEGIN_SRC emacs-lisp
-(use-package chatgpt-shell
-  :custom
-  ((chatgpt-shell-openai-key
-    (lambda ()
-      (auth-source-pass-get 'secret "openai-key")))))
+(use-package chatgpt-shell)
+(setq chatgpt-shell-openai-key
+      (lambda ()
+        (nth 0 (process-lines "pass" "show" "System/openai"))))
+#+END_SRC
 
-(setq chatgpt-shell-openai-key "XXX")
-      ;; (lambda ()
-      ;;   ;; (auth-source-pass-get 'secret "openai-key") ; alternative using pass support in auth-sources
-      ;;   (nth 0 (process-lines "pass" "show" "System/openai"))))
+** Grammalecte
+
+| =flycheck-grammalecte= | https://github.com/milouse/flycheck-grammalecte |
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck-grammalecte
+  :config (flycheck-grammalecte-setup)
+  :init
+  (setq flycheck-grammalecte-report-apos nil
+        flycheck-grammalecte-report-esp nil
+        flycheck-grammalecte-report-nbsp nil
+        flycheck-grammalecte-report-typo nil
+        flycheck-grammalecte-report-spellcheck t
+        flycheck-grammalecte-report-grammar t
+        flycheck-checker-error-threshold 4000))
+#+END_SRC
+
+** Org-download
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package org-download
+  :ensure t
+  :after org
+  :config
+  (setq-default
+   org-download-image-dir "assets"
+   ;; Basename setting seems to be simply ignored.
+   org-download-screenshot-basename ".org.png"
+   org-download-timestamp "org_%Y%m%d-%H%M%S_"
+   org-download-heading-lvl nil)
+  :custom
+  (org-download-screenshot-method
+   (cond
+    ((eq system-type 'gnu/linux)
+     "xclip -selection clipboard -t image/png -o > '%s'")
+    ((eq system-type 'darwin)
+     "pngpaste %s")))
+  :bind
+  (:map org-mode-map
+        (("C-M-y" . org-download-yank))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Yanking-Media.html
+;; https://dev.to/bitschupser/how-to-paste-images-into-emacs-org-mode-running-in-windows-subsystem-for-linux-2pc0
+
+(defun me/org-paste-image ()
+  "Paste an image into a time stamped unique-named file in the
+same directory as the org-buffer and insert a link to this file."
+  (interactive)
+  (let* ((target-file
+          (concat
+           (file-name-directory (buffer-file-name))
+           (concat (read-string "filename: ") ".png")))
+         (wsl-path
+          (concat (me//as-windows-path(file-name-directory target-file))
+                  "\\"
+                  (file-name-nondirectory target-file)))
+         (ps-script
+          (concat "(Get-Clipboard -Format image).Save('" wsl-path "')")))
+
+    (me//powershell ps-script)
+
+    (if (file-exists-p target-file)
+        (progn (insert (concat "[[" target-file "]]"))
+               (org-display-inline-images))
+      (user-error
+       "Error pasting the image, make sure you have an image in the clipboard!"))
+    ))
+
+(defun me//as-windows-path (unix-path)
+  "Takes a unix path and returns a matching WSL path
+(e.g. \\\\wsl$\\Ubuntu-20.04\\tmp)"
+  ;; substring removes the trailing \n
+  (substring
+   (shell-command-to-string
+    (concat "wslpath -w " unix-path)) 0 -1))
+
+(defun me//powershell (script)
+  "executes the given script within a powershell and returns its return value"
+  (call-process "powershell.exe" nil nil nil
+                "-Command" (concat "& {" script "}")))
+
+(with-eval-after-load 'evil
+  (evil-define-key 'normal org-mode-map
+    (kbd "C-M-y") #'me/org-paste-image))
 #+END_SRC
 
 * Config
@@ -2988,7 +3065,6 @@ multiplicative.
 
 ; XXX: 26.3 (add-to-list 'lsp-clients-clangd-args "--enable-config")
 #+END_SRC
-
 
 
 ** TMP
