@@ -801,7 +801,6 @@ Disable =evil= in some modes.
 | =helm-projectile= | https://github.com/bbatsov/helm-projectile    |
 | =helm-xref=       | https://github.com/brotzeit/helm-xref         |
 | =helm-lsp=        | https://github.com/emacs-lsp/helm-lsp         |
-| =helm-descbinds=  | https://github.com/emacs-helm/helm-descbinds  |
 | =helm-swoop=      | https://github.com/emacsorphanage/helm-swoop  |
 | =helm-ag=         | https://github.com/emacsorphanage/helm-ag     |
 | =helm-themes=     | https://github.com/emacsorphanage/helm-themes |
@@ -856,14 +855,6 @@ Install =projectile= support in =helm=.
 (use-package helm-projectile
   :config
   (helm-projectile-on))
-#+END_SRC
-
-A =helm= frontend for =describe-bindings=.
-
-#+BEGIN_SRC emacs-lisp
-(use-package helm-descbinds
-  :config
-  (helm-descbinds-mode))
 #+END_SRC
 
 Efficiently hopping squeezed lines powered by =helm=.
@@ -1737,7 +1728,7 @@ FIXME: not working
 | =chatgpt-shell= | https://github.com/xenodium/chatgpt-shell |
 
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package chatgpt-shell)
 (setq chatgpt-shell-openai-key
       (lambda ()
