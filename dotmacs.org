@@ -1567,11 +1567,9 @@ YASnippet is a template system for Emacs.
 
 Modern on-the-fly syntax checking.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package flycheck
-  :init (global-flycheck-mode nil)
-  :config
-  (add-hook 'after-init-hook #'global-flycheck-mode))
+  :init (global-flycheck-mode nil))
 #+END_SRC
 
 ** Undo history
@@ -1739,7 +1737,7 @@ FIXME: not working
 
 | =flycheck-grammalecte= | https://github.com/milouse/flycheck-grammalecte |
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package flycheck-grammalecte
   :config (flycheck-grammalecte-setup)
   :init
