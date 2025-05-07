@@ -360,8 +360,8 @@ directories with an ever-growing number of cache files.
   (me|set-in-tmp-dir request-storage-directory "request/"))
 (with-eval-after-load 'tramp
   (me|set-in-tmp-dir tramp-persistency-file-name "tramp.eld"))
-(with-eval-after-load 'url
-  (me|set-in-tmp-dir url-configuration-directory "url/"))
+;FIXME (with-eval-after-load 'url
+;  (me|set-in-tmp-dir url-configuration-directory "url/"))
 #+END_SRC
 
 *** =.*~=
@@ -1738,6 +1738,7 @@ FIXME: not working
 | =flycheck-grammalecte= | https://github.com/milouse/flycheck-grammalecte |
 
 #+BEGIN_SRC emacs-lisp :tangle no
+; FIXME: init crash
 (use-package flycheck-grammalecte
   :config (flycheck-grammalecte-setup)
   :init
