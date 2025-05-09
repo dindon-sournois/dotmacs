@@ -990,7 +990,7 @@ Change font to a powerline-patched one.
 
 #+BEGIN_SRC emacs-lisp
 ;; (set-default-font "Dejavu Sans Mono for Powerline")
-(set-face-attribute 'default nil :height 150) ;; format: 1/X pt
+(set-face-attribute 'default nil :height 120) ;; format: 1/X pt
 #+END_SRC
 
 Change frame name of emacs.
@@ -1576,11 +1576,9 @@ YASnippet is a template system for Emacs.
 
 Modern on-the-fly syntax checking.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package flycheck
-  :init (global-flycheck-mode nil)
-  :config
-  (add-hook 'after-init-hook #'global-flycheck-mode))
+  :init (global-flycheck-mode nil))
 #+END_SRC
 
 ** Undo history
@@ -2244,6 +2242,14 @@ tool for Emacs.
 
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode)
+#+END_SRC
+
+** AutoHotKey
+
+| =ahk-mode= | https://github.com/punassuming/ahk-mode |
+
+#+BEGIN_SRC emacs-lisp
+(use-package ahk-mode)
 #+END_SRC
 
 * Keybinds
