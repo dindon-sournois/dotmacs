@@ -988,9 +988,15 @@ I find myself using the =menu-bar= on the GUI, so enable it in this case.
 
 Change font to a powerline-patched one.
 
-#+BEGIN_SRC emacs-lisp
-;; (set-default-font "Dejavu Sans Mono for Powerline")
-(set-face-attribute 'default nil :height 120) ;; format: 1/X pt
+#+BEGIN_SRC emacs-lisp :tangle no
+;; (set-frame-font "Dejavu Sans Mono for Powerline")
+;; (set-face-attribute 'default nil :height 120) ;; format: 1/X pt
+(defun me//font-exists-p (font) (if (null (x-list-fonts font)) nil t))
+(when (window-system)
+  (cond ((me//font-exists-p "Dejavu Sans Mono for Powerline")
+      (set-frame-font "Dejavu Sans Mono for Powerline:spacing=100:size=16" nil t))
+        ))
+;; ((me//font-exists-p "Courier New") (set-frame-font "Courier New:spacing=100:size=18" nil t))))
 #+END_SRC
 
 Change frame name of emacs.
