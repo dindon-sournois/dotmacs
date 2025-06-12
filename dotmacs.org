@@ -1230,6 +1230,15 @@ Add a transient state to resize the centered buffer.
  :transient t)
 #+END_SRC
 
+Global mode:
+
+#+begin_src emacs-lisp
+(define-globalized-minor-mode me/global-olivetti-mode olivetti-mode
+  (lambda () (olivetti-mode 1)))
+
+(me/global-olivetti-mode 0)
+#+end_src
+
 ** File explorer
 
 | =treemacs= | https://github.com/Alexander-Miller/treemacs |
@@ -1783,6 +1792,33 @@ FIXME: not working
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
+(use-package org-download
+  :after org
+  :defer nil
+  :custom
+  (org-download-method 'directory)
+  (org-download-image-dir "images")
+  (org-download-heading-lvl nil)
+  (org-download-timestamp "")
+  (org-image-actual-width t)
+  (org-download-screenshot-method "/usr/local/bin/pngpaste %s")
+  ;; :bind
+  ;; (:map org-mode-map
+  ;;       (("C-M-y" . #'me/org-paste)))
+  :config
+  (require 'org-download))
+
+(defun me/org-paste-image()
+    (interactive)
+    (org-download-clipboard (concat (read-string "filename: ") ".png")))
+
+(with-eval-after-load 'org-download
+  (evil-define-key 'normal org-mode-map
+    (kbd "C-M-y") #'me/org-paste-image))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
+
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Yanking-Media.html
 ;; https://dev.to/bitschupser/how-to-paste-images-into-emacs-org-mode-running-in-windows-subsystem-for-linux-2pc0
 
@@ -2521,7 +2557,7 @@ the major mode keybind. We choose =,,= for the prefix.
   ;; FIXME: prettify this
   "bB" 'helm-mini
   "bb" 'switch-to-buffer
-  "bd" 'kill-this-buffer
+  "bd" 'kill-current-buffer
   "bk" 'kill-buffer
   "bD" 'crux-kill-other-buffers
   "bs" 'scratch-buffer
@@ -2839,9 +2875,12 @@ the major mode keybind. We choose =,,= for the prefix.
 #+BEGIN_SRC emacs-lisp
 (me/leader-def
   "t"  '(:ignore t :which-key "toggles")
-  "tC" 'me/transient-center-width
-  "tc" '(:ignore t :which-key "center-mode")
-  "tc" 'olivetti-mode
+  "tCw" '(:ignore t :which-key "center-mode transient")
+  "tCw" 'me/transient-center-width
+  "tCc" '(:ignore t :which-key "center-mode")
+  "tCc" 'olivetti-mode
+  "tc" '(:ignore t :which-key "global-center-mode")
+  "tc" 'me/global-olivetti-mode
   "tg" 'golden-ratio
   "tG" 'golden-ratio-mode
   "th" 'global-hl-todo-mode
