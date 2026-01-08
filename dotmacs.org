@@ -1471,6 +1471,8 @@ for Emacs that can be used to easily jump back to previous locations.
 (advice-add 'lsp-find-definition :around #'me//evil-set-jump)
 (advice-add 'lsp-find-declaration :around #'me//evil-set-jump)
 (advice-add 'lsp-find-implementation :around #'me//evil-set-jump)
+(advice-add 'helm-imenu :around #'me//evil-set-jump)
+(advice-add 'helm-projectile-grep :around #'me//evil-set-jump)
 ;; (advice-add 'lsp-find-type-definitio:around #'me//evil-set-jump)
 ;; (advice-add 'xref-find-apropos :around #'me//evil-set-jump)
 
@@ -2285,7 +2287,7 @@ tool for Emacs.
   :states '(normal visual)
   "SPC" 'helm-M-x
   ","   'evil-snipe-repeat-reverse
-  "TAB" 'crux-other-window-or-switch-buffer
+  "TAB" 'crux-switch-to-previous-buffer
   "u"   'universal-argument)
 ;; "'" 'shell-pop)
 #+END_SRC
