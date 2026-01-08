@@ -1738,16 +1738,13 @@ FIXME: not working
 (setq-default desktop-base-file-name "desktop")
 #+END_SRC
 
-** ChatGPT / Dall-E
+** LLM
 
-| =chatgpt-shell= | https://github.com/xenodium/chatgpt-shell |
+| =gptel= | https://github.com/karthink/gptel |
 
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package chatgpt-shell)
-(setq chatgpt-shell-openai-key
-      (lambda ()
-        (nth 0 (process-lines "pass" "show" "System/openai"))))
+(use-package gptel)
 #+END_SRC
 
 ** Grammalecte
