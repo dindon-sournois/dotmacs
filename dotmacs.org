@@ -261,6 +261,7 @@ Here are what I consider better defaults as per my own experience.
 
 #+BEGIN_SRC emacs-lisp
 (setq-default
+ load-prefer-newer t                      ; Don't reuse old byte-code
  ;;ad-redefinition-action 'accept         ; Silence warnings for redefinition
  ;;require-final-newline t                ; Newline at end of file
  ;;auto-save-list-file-prefix nil         ; Prevent tracking for auto-saves
@@ -2247,6 +2248,14 @@ tool for Emacs.
 
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode)
+#+END_SRC
+
+** Julia
+
+| =julia-mode= | https://github.com/JuliaEditorSupport/julia-emacs |
+
+#+BEGIN_SRC emacs-lisp
+(use-package julia-mode)
 #+END_SRC
 
 ** AutoHotKey
