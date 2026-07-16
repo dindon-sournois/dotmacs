@@ -2120,6 +2120,18 @@ FIXME: not working
  '(ediff-split-window-function 'split-window-horizontally))
 #+END_SRC
 
+** Flyspell
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'text-mode-hook
+          (lambda ()
+            (ispell-change-dictionary "en_GB")))
+;; (use-package guess-language
+;;   :config
+;;   (setq guess-language-languages '(gb fr)
+;;         guess-language-min-paragraph-length 35)
+;;   (guess-language-mode 1))
+#+END_SRC
 * Languages
 ** Ascii Doc
 
