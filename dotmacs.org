@@ -290,7 +290,8 @@ Here are what I consider better defaults as per my own experience.
  ;;window-combination-resize t            ; Resize windows proportionally
  ;;x-stretch-cursor t                     ; Stretch cursor to the glyph width
  vc-follow-symlinks t                  ; Open symlinks without confirmation
- ring-bell-function 'ignore)           ; Because who needs that
+ ring-bell-function 'ignore            ; Because who needs that
+ compilation-scroll-output t)          ; Make sure the cursor goes to the end of log
 
 (blink-cursor-mode 0)                   ; Prefer a still cursor
 (delete-selection-mode 1)               ; Replace region when inserting text
@@ -1864,6 +1865,18 @@ same directory as the org-buffer and insert a link to this file."
     (kbd "C-M-y") #'me/org-paste-image))
 #+END_SRC
 
+** Move text
+
+| =move-text= | https://github.com/emacsfodder/move-text |
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package move-text
+  :bind
+  (:map prog-mode-map
+        ("M-j" . move-text-down)
+        ("M-k" . move-text-up)))
+#+END_SRC
+
 * Config
 ** Automatically refresh buffer when file changed on disk
 
@@ -2441,8 +2454,10 @@ the major mode keybind. We choose =,,= for the prefix.
   "ge" 'lsp-treemacs-errors-list ; (fboundp 'lsp-treemacs-errors-list)
   "gd" '(:ignore t :which-key "find definitions")
   "gd" 'lsp-find-definition ; (lsp-feature? "textDocument/definition")
-  "gD" '(:ignore t :which-key "find definitions other window")
-  "gD" 'xref-find-definitions-other-window
+  "gDv" '(:ignore t :which-key "find definitions other window vertical")
+  "gDv" 'xref-find-definitions-other-window
+  ;; "gDs" '(:ignore t :which-key "find definitions other window horizontal")
+  ;; "gDs" 'me/xref-find-definitions-other-window-horizontal
   "gh" '(:ignore t :which-key "call hierarchy")
   "gh" 'lsp-treemacs-call-hierarchy ; (and (lsp-feature? "callHierarchy/incomingCalls")
                                         ;(fboundp 'lsp-treemacs-call-hierarchy))
