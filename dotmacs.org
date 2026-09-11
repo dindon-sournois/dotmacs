@@ -1527,8 +1527,9 @@ resides) or make a symbolic link.
      "--limit-references=0"
      "--limit-results=0"
      "--rename-file-limit=0"
-     "--j=4"
-     "--background-index"
+     ;; "--background-index"
+     ;; "--background-index-priority=background"
+     "-j" "1"
      ;; "-log=error"
      ))
 
