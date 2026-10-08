@@ -988,7 +988,7 @@ You might still need this for an emacs without x-toolkit:
 
 I find myself using the =menu-bar= on the GUI, so enable it in this case.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (defun me//contextual-menubar (&optional frame)
   "Display the menubar in FRAME (default: selected frame) if on a
     graphical display, but hide it if in terminal."
@@ -1004,7 +1004,9 @@ Change font to a powerline-patched one.
 
 #+BEGIN_SRC emacs-lisp
 ;; (set-default-font "Dejavu Sans Mono for Powerline")
-(set-face-attribute 'default nil :height 100) ;; format: 1/X pt
+(set-face-attribute 'default nil :height 150) ;; format: 1/X pt
+
+;; desktop 150
 #+END_SRC
 
 Change frame name of emacs.
